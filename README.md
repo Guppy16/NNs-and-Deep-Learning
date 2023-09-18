@@ -1,2 +1,3 @@
 # NNs-and-Deep-Learning
- Start on NNs and deep learning
+
+This repo tracks my notes and exercises while completing the book [Neural Networks and Deep Learning](http://neuralnetworksanddeeplearning.com/index.html).
