@@ -4,7 +4,7 @@ This repo tracks my notes and exercises while completing the book [Neural Networ
 
 ![Initial Layer weights](resources/figures/digit_weights_mse.gif)
 
-> This gif shows the weights learnt for each digit in a NN with no hidden layer
+> This gif shows the weights learnt for each digit in a NN with no hidden layer. This is equivalent to applying a mask (linear transformation).
 
 
 ## Organisation

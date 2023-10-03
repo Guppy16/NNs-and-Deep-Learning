@@ -288,7 +288,7 @@ Another explanation is:
 
 ### Artificially increasing the training set
 
-![Alt text](resources/figures/training-size-accuracy.png)
+![Alt text](../resources/figures/training-size-accuracy.png)
 
 This graph shows that as the training set size increases, the accuracy increases. However gathering more data can be expensive. Instead, artificially increasing the training set size can make vast improvements:
 

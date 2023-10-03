@@ -19,7 +19,7 @@ $$
 
 A network of perceptrons can be equivalent to a NAND gate:
 
-![NAND gate equivalent perceptrons](resources/figures/nand_perceptron.png)
+![NAND gate equivalent perceptrons](../resources/figures/nand_perceptron.png)
 
 - This means that perceptrons are "no better" than our basis of computation.
 - How do we implement "learning"!
@@ -34,11 +34,11 @@ $$
 
 Sigmoid function is used because it has good analytical properties when differentiating.
 
-![Alt text](resources/figures/sigmoid.png)
+![Alt text](../resources/figures/sigmoid.png)
 
 Neuron becomes a perceptron if the activation function is a step: $y = H(w \cdot x + b)$ (actually $H(0) = 0$, but a perceptron is 1).
 
-![Alt text](resources/figures/step.png)
+![Alt text](../resources/figures/step.png)
 
 ### Excercises
 
@@ -66,7 +66,7 @@ In the limit $c \to \inf \implies \sigma(cz) \to H(z)$, hence a sigmoid neuron t
 
 - Note: Confusingly, these use sigmoid activation functions (as opposed to perceptrons)
 
-![Alt text](resources/figures/mlp.png)
+![Alt text](../resources/figures/mlp.png)
 
 There are some design / engineering heuristics used when deciding on the hidden layers:
 
@@ -83,7 +83,7 @@ Other networks:
 
 ### Exercise - Network to recognise digits
 
-![Alt text](resources/figures/digit_recognition_NN.png)
+![Alt text](../resources/figures/digit_recognition_NN.png)
 
 Intersting thought: The output layer is composed of 10 Neurons.
 What if this was changed to a bitwise representation composed of 4 neurons?
@@ -196,6 +196,38 @@ Dadv: Can overfit to the training example
 > Try creating a network with just two layers
 
 This achieved an accuracy of 91% with `learning rate = 1, mini batch = 30`. This is a lot better than I expected! Though, with a hidden layer of 30 and `learning rate=3`, a much better performance of 95% was achieved see [this post](https://peekaboo-vision.blogspot.com/2010/09/mnist-for-ever.html) and the [sklearn tutorial on RBFs with SVM](https://scikit-learn.org/dev/auto_examples/svm/plot_rbf_parameters.html).
+
+Interestingly, having no hidden layer is equivalent to learning from a linear model. 
+
+$$
+\begin{align*}
+\text{Neurons for Digit 1 } y_1: \\
+z_1 &= w_1 \cdot x + b\\
+y_1  &= \sigma(w_1 \cdot x + b) \\
+\text{Gradient} \\
+\frac{\partial y_1}{\partial x} &= \frac{\partial \sigma}{\partial z_1} \frac{\partial z_1}{\partial x}
+\\
+\sigma \text{ is monotonic, so} \\
+\left[\frac{\partial y_1}{\partial x}\right] 
+&= \left[ \frac{\partial z_1}{\partial x} \right]
+= \vec{0}
+\\
+\text{at a stationary point.}\\ \\
+\end{align*}
+$$
+
+Note this is a heuristic calculation (we should really be comparing the gradients of the cost function, but the idea is the same). Since $\sigma$ is monotonic, the theorerical global optimum will be the same as a linear model!
+However, since we use SGD instead of say OLS (ordinary least squares), we may trade-off being less overfit at the expsnse of hitting a local optimum (i.e performing worse on the training set but perhaps better on the validation set).
+
+Note also:
+$$
+\text{sign}\left[\frac{\partial y_1}{\partial x}\right] 
+= \text{sign} \left[ \frac{\partial z_1}{\partial x} \right]
+$$
+
+This is the elementwise $\text{sign}$ function: essentially each element will have the same sign, hence the gradients will be pointing in the same direction. This means that the gradient updates will be in the same direction as if it were a linear model (though the magnitude of the updates will be differen due to the non-linear sigmoid scaling).
+
+Fun:
 
 $$
 \text{sophisticated algorithm} \le \text{simple learning algorithm} + \text{good training data}
