@@ -2,3 +2,4 @@ resources/model
 resources/data
 .idea
 .vscode
+__pycache__
