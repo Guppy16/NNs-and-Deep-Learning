@@ -320,7 +320,7 @@ $$
 \text{Weight update in stochastic gradient descent:} \\
 w \to w' = \left(1 - \frac{\eta \lambda}{n} \right) w - \frac{\eta}{m} \sum_m \frac{\partial C_{0,x}}{\partial w} \\
 $$
-Suppose we are using the original approach to weight initialization. A wavy argument can be formulated to show that L2 regularization is leads to the improved initialization scheme:
+Suppose we are using the original approach to weight initialization. A wavy argument can be formulated to show that L2 regularization leads to the improved initialization scheme:
 
 1. In the first few epochs, $\frac{\partial C}{\partial w}$ will be small because the neurons are saturated. Hence, assuming $\lambda$ is large enough, the weight update equation simplifies to: 
 
@@ -354,7 +354,7 @@ As a baseline, aim to get _any non-trivial_ learning by performing better than c
 ### Choosing hyperparemeters
 
 - Pick the learning rate $\eta$ by monitoring the training cost.
-- Use _early stopping_ to determin the number of epochs
+- Use _early stopping_ to determine the number of epochs
   - However, in the early stages, don't use early stopping, because increased epochs can help monitor regularization performance
   - A good rule of thumb is _no-improvement-in-ten-rule_, i.e. stop if no improvement after 10 epochs. This can be made more lenient as other parameters are well adjusted.
   - Other methods exist, which compromise achieving high validation accuracies for not training too long.
