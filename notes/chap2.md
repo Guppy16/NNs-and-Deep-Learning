@@ -4,9 +4,9 @@
 
 ## A fast matrix-based approach to computing the output from a neural network
 
-- $w_{jk}^l$ refers to the $k$th neuron in the $l-1$th layer to the $j$th neuron on the $l$th layer.
-- $a_j^l$ is the activation of the $j$th neuron in the $l$th layer.
-- $b_j^l$ is the bias in the $j$th neuron in the $l$th layer
+- $w_{jk}^l$ refers to the $k$-th neuron in the $l-1$-th layer to the $j$-th neuron on the $l$-th layer.
+- $a_j^l$ is the activation of the $j$-th neuron in the $l$-th layer.
+- $b_j^l$ is the bias in the $j$-th neuron in the $l$-th layer
 
 $$
 a_j^l = \sigma \left( \sum_k w_{jk}^l a_k^{l-1} + b_j^l \right)
@@ -22,7 +22,7 @@ $$
 $$
 
 - $z^l$ is the _weighted input_ to the neurons in the layer $l$
-- $w^l$ as the weight matrix defining the weights connecting the layer $l-1$ to $l$. i.e. the $w_{jk}^l$ refers to the $j$th row and $k$th column.
+- $w^l$ as the weight matrix defining the weights connecting the layer $l-1$ to $l$. i.e. the $w_{jk}^l$ refers to the $j$-th row and $k$-th column.
 
 ## Assumption we need about the cost function
 
@@ -35,7 +35,7 @@ $$
 
 - element-wise product of two matrices of the same dimension commonly referred to as _Hadamard product_ or _Schur product_:
 
-$$
+```math
 \begin{bmatrix}
   1 \\ 2
 \end{bmatrix}
@@ -43,7 +43,7 @@ $$
 \begin{bmatrix}
   3 \\ 4
 \end{bmatrix}
-=
+  =
 \begin{bmatrix}
   1 \times 3 \\ 2 \times 4
 \end{bmatrix}
@@ -51,11 +51,11 @@ $$
 \begin{bmatrix}
   3 \\ 8  
 \end{bmatrix}
-$$
+```
 
 ## Fundamental equations behind backpropagation
 
-The error in the cost wrt the _weighted input_ in the $j$th neuron in the $l$th layer can be interpreted as $\delta_j^L := \frac{\partial C}{\partial z_j^l}$. Intuitively, if the error is small, then we have reached a local minima.
+The error in the cost wrt the _weighted input_ in the $j$-th neuron in the $l$-th layer can be interpreted as $\delta_j^L := \frac{\partial C}{\partial z_j^l}$. Intuitively, if the error is small, then we have reached a local minima.
 
 Note: For this section, we will use [denominator-layout notation](https://en.wikipedia.org/wiki/Matrix_calculus#Denominator-layout_notation), which is the convention used by the book. However libraries such as `pytorch` and `numpy` use numerator-layout convention:
 
@@ -84,7 +84,9 @@ $$
 \end{align*}
 $$
 
-### BP2. Equation for the error $\delta^l$ in terms of the error in the next layer $\delta^{l+1}$
+### BP2. Recursive equation for layer error
+
+Equation for the error $\delta^l$ in terms of the error in the next layer $\delta^{l+1}$
 
 $$
 \begin{align*}
@@ -92,7 +94,7 @@ $$
   &= \left[ \frac{\partial z^{l+1}}{\partial z^l} \right] \frac{\partial C}{\partial z^{l+1}}  \\
   &= \left[ \frac{\partial z^{l+1}}{\partial z^l} \right] \delta^{l+1} \\
   \text{Consider:} \\
-  \frac{\partial}{\partial z^l} \{ z^{l+1} &= w^{l+1} \sigma(z^l) + b^{l+1} \} \\
+  \frac{\partial}{\partial z^l} \{ z^{l+1} \} &= \frac{\partial}{\partial z^l} \{ w^{l+1} \sigma(z^l) + b^{l+1} \} \\
   \implies \frac{\partial z^{l+1}}{\partial z^l} &= \left[ \frac{\partial \vec{\sigma}}{\partial \vec{z^l}} \right] \frac{\partial}{\partial \vec{\sigma}} w^{l+1} \vec{\sigma}  \\
   &= \Sigma'(z^l) \ (w^{l+1})^T \\
   \text{Subbing in:} \\
@@ -122,8 +124,15 @@ $$
   &= \frac{\partial \vec{z}^l}{\partial w_{jk}^l} \frac{\partial C}{\partial \vec{z}^l} \\
   &= \frac{\partial}{\partial w_{jk}^l} \{w^la^{l-1} + b^l\} \vec{\delta}^l \\
   &= a_k^{l-1} \vec{\delta}_j^l \\
-  \implies \frac{\partial C}{\partial w^l} &= \delta^l {a^{l-1}}^T \\
-  &= a_\text{in} \delta_\text{out}
+\end{align*}
+$$
+
+Thus:
+
+$$
+\begin{align*}
+\implies \frac{\partial C}{\partial w^l} &= \delta^l {a^{l-1}}^T \\
+&= a_\text{in} \delta_\text{out}
 \end{align*}
 $$
 
