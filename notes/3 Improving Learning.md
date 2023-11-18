@@ -1,15 +1,17 @@
 # Improving the way neural networks learn
 
+This markdown file contains my notes on Chapter 3 of the book [Neural Networks and Deep Learning](http://neuralnetworksanddeeplearning.com/chap3.html).
 This chapter will introduce many techniques to improve the network learning including:
-
-- cost function
-- 4 regularisation methods
+- Cross Entropy cost function
+- Softmax on the output layer
+- 4 Regularisation methods
   - L1 / L2 regularisation
   - dropout
   - artificial expansion of the training data
-- weight initialisation
-- set of heuristics for choosing good hyperparameters
-- and more..
+- Weight Initialisation
+- Heuristics for tuning Hyperparameters
+- Variations of Gradient Descent
+- Other activation funcitons: Tanh, ReLu
 
 ## The cross-entropy cost function
 
@@ -133,13 +135,13 @@ Consider the derivative of the softmax function wrt an input:
 $$
 \begin{align*}
   \frac{\partial a_j^L}{\partial z_k^L}
-  &= \frac{\partial}{\partial z_k^L} \left\{ \exp(z_j^L) \left(\sum_i \exp(z_i^L)\right)^{-1} \right\} \\
-  
+  &= \frac{\partial}{\partial z_k^L} \left\\{ \exp(z_j^L) \left(\sum_i \exp(z_i^L)\right)^{-1} \right\\} \\
+  %%% Consider j not equal to k
   \text{for } j \ne k \\
   &= - \exp(z_j^L) \exp(z_k^L) \left(\sum_i \exp(z_i^L)\right)^{-2} \\
   &= - a_j^L (1 - a_k^L)\\
   & < 0 \\
-  
+  %%% Consider j=k
   \text{for } j = k \\
   &= \exp(z_j^L) \left(\sum_i \exp(z_i^L)\right)^{-1} - \exp(2z_j^L) \left(\sum_i \exp(z_i^L)\right)^{-2} \\
   &= a_j^L - {a_j^L}^2 = a_j^L (1 - a_j^L) \\
@@ -316,10 +318,13 @@ Interestingly, the initialisation of the bias doesn't matter so much (as long as
 Note: weight initialisation improves the rate of convergence to an optimal set of weights and biases; however, it doesn't necessarly improve the accuracy of the model. (in Chap 4, better initialisations _do_ actually enable a other methods to improve the performance).
 
 > Connecting regularization and the improved method of weight initialzation
+
+Recall: Weight update in stochastic gradient descent
+
 $$
-\text{Weight update in stochastic gradient descent:} \\
 w \to w' = \left(1 - \frac{\eta \lambda}{n} \right) w - \frac{\eta}{m} \sum_m \frac{\partial C_{0,x}}{\partial w} \\
 $$
+
 Suppose we are using the original approach to weight initialization. A wavy argument can be formulated to show that L2 regularization leads to the improved initialization scheme:
 
 1. In the first few epochs, $\frac{\partial C}{\partial w}$ will be small because the neurons are saturated. Hence, assuming $\lambda$ is large enough, the weight update equation simplifies to: 
@@ -334,7 +339,7 @@ $$
 $$
 
 2. For $n/m \gg \eta \lambda / m$, the weight decay per epoch simplifies to: $w' = \exp - (\eta \lambda / m)$.
-3. ?? Supposing $\lambda$ is not too large, weight decays will tail off when the $|w| \sim 1/\sqrt{n}$
+3. (?? Not sure about this step) Supposing $\lambda$ is not too large, weight decays will tail off when the $|w| \sim 1/\sqrt{n}$
 
 ## How to choose a neural network's hyper-parameters?
 
@@ -378,6 +383,7 @@ Potentially this isn't the best idea because the landscae isn't broadly convex. 
 #### Hessian Technique
 
 Taylor expansion gives
+
 $$
 \begin{align*}
   C(w + \Delta w) & \approx C(w) + \nabla C \cdot \Delta w + \frac{1}{2} \Delta w^T H \Delta w \\
