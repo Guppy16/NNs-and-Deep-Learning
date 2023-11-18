@@ -1,6 +1,16 @@
 # How the backpropogation algorithm works
 
-- The backpropogation algorithm was introduced in the 70s, but was better understood in a famous [1986 paper by Rumelhart, Hinton, Williams](http://www.nature.com/nature/journal/v323/n6088/pdf/323533a0.pdf)
+This markdown file contains my notes on Chapter 2 of the book [Neural Networks and Deep Learning]([url](http://neuralnetworksanddeeplearning.com/chap2.html)).
+It is essentially a bank of equation derivations:
+- Mean Square Error Cost function
+- 4 Fundamental Equations
+  - Error due to output layer weights
+  - Recursive equation for layer error
+  - Error due to bias
+  - Error due to weight in any layer
+- Backpropogation algorithm
+
+The backpropogation algorithm was introduced in the 70s, but was better understood in a famous [1986 paper by Rumelhart, Hinton, Williams](http://www.nature.com/nature/journal/v323/n6088/pdf/323533a0.pdf)
 
 ## A fast matrix-based approach to computing the output from a neural network
 
@@ -165,4 +175,4 @@ This corresponds to setting $\sigma'(z^l) = \vec{1}$
 
 Backpropagation requires two passes through the network: forward and backward, which are both similar in complexity (Note that there are no inverse matrices required to be calculated!).
 
-A naive approach may be to find $\partial C / \partial w_{jk}^l$ for each weight by using a first order apporximation and runing the network twice to find $C(w), C(w + \epsilon)$. This scales with the number of parameters, which is incredibly slow. Conversely, backpropagation utilises the chain rule to update all the parameters based of one observation, by utilising the relationship between the weights.
+A naive approach may be to find $\partial C / \partial w_{jk}^l$ for each weight by using a first order apporximation and running the network twice to find $C(w), C(w + \epsilon)$. This scales with the number of parameters, which is incredibly slow. Conversely, backpropagation utilises the chain rule to update all the parameters based of one observation, by utilising the relationship between the weights.
