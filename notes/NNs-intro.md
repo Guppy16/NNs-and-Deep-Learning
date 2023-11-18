@@ -1,9 +1,11 @@
-# Neural Networks and Deep Learning
+# Chapter 1: Using neural nets to recognize handwritten digits
 
-This markdown file contains my notes when reading through the book
+This markdown file contains my notes on Chapter 1 of the book
 [Neural Networks and Deep Learning](http://neuralnetworksanddeeplearning.com/index.html).
-
-## Chap 1
+- Perceptron / Sigmoid-Neurons
+- Architecture
+- Stochastic Gradient Descent
+- No hidden layer network (= linear model!)
 
 ### Perceptron
 
@@ -220,6 +222,7 @@ Note this is a heuristic calculation (we should really be comparing the gradient
 However, since we use SGD instead of say OLS (ordinary least squares), we may trade-off being less overfit at the expsnse of hitting a local optimum (i.e performing worse on the training set but perhaps better on the validation set).
 
 Note also:
+
 $$
 \text{sign}\left[\frac{\partial y_1}{\partial x}\right] 
 = \text{sign} \left[ \frac{\partial z_1}{\partial x} \right]
