@@ -20,9 +20,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from dataclass_wizard import YAMLWizard
 import pickle
+import os
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 SEED: int = 16  # Random seed
-RESOURCES = Path("../resources/")  # Path to resources
+RESOURCES = Path(f"{dir_path}/../resources/")  # Path to resources
 logging.basicConfig(level=logging.INFO)
 
 
@@ -209,18 +211,26 @@ class DigitClassifier(nn.Module):
       *,
       metrics: Metrics,
       num_epochs: int = 30,
+      func: callable = None,
+      **func_kwargs,
   ):
     """Training loop for NN
 
     Args:
       metrics: see Metrics
       num_epochs: number of iterations over whole dataset
+      func: function to run after each epoch. Takes model as arg
+      **func_kwargs: kwargs to pass to func
     """
     # Set model to train mode
     self.train()
 
     # Training loop
     for epoch in range(num_epochs):
+      # Before each epoch
+      # Run func
+      if func:
+        func(self, **func_kwargs)
       for data_inputs, data_labels in self.train_dataloader:
         # 1. Move input data to device
         data_inputs = data_inputs.to(DEVICE)
@@ -255,7 +265,7 @@ class DigitClassifier(nn.Module):
       metrics.valid_precision_epoch.append(float(precision.cpu()))
       # Log accuracy
       total = len(self.val_dataloader.dataset)
-      logger.info(f"Epoch: {epoch}: {precision*total} / {total}")
+      logger.info(f"Epoch: {epoch}: {precision*total:.0f} / {total}")
       # TODO: Calculate loss on validation set
 
   @torch.no_grad()
