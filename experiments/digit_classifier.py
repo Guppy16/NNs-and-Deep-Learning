@@ -10,7 +10,6 @@ from torch.utils.data import DataLoader
 import torchvision
 import torchvision.transforms as transforms
 import torch.nn as nn
-from ignite.metrics import ConfusionMatrix
 import itertools
 from tqdm import tqdm
 import time
@@ -21,6 +20,7 @@ from pathlib import Path
 from dataclass_wizard import YAMLWizard
 import pickle
 import os
+
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 SEED: int = 16  # Random seed
@@ -64,33 +64,42 @@ def set_seeds(seed: int = SEED) -> None:
   # rng = torch.Generator().manual_seed(seed)
 
 
-def train_test_datasets(root: Path = RESOURCES / "data") -> tuple[torchvision.datasets.mnist.MNIST, ...]:
+def train_test_datasets(
+    root: Path = RESOURCES / "data",
+) -> tuple[torchvision.datasets.mnist.MNIST, ...]:
   """Get training and test set from MNIST"""
 
   # Transform data
-  t = transforms.Compose([
-      transforms.PILToTensor(),
-      transforms.ConvertImageDtype(torch.float),
-      torch.flatten,
-  ])
+  t = transforms.Compose(
+      [
+          transforms.PILToTensor(),
+          transforms.ConvertImageDtype(torch.float),
+          torch.flatten,
+      ]
+  )
 
   root = str(root)
   train_data = torchvision.datasets.MNIST(
-      root=root, train=True, download=True, transform=t)
+      root=root, train=True, download=True, transform=t
+  )
   logger.info("Train size: %s", len(train_data))
   test_data = torchvision.datasets.MNIST(
-      root=root, train=False, download=True, transform=t)
+      root=root, train=False, download=True, transform=t
+  )
   logger.info("Test size: %s", len(test_data))
 
   return train_data, test_data
 
 
-def train_val_dataset_split(dataset: torchvision.datasets.mnist.MNIST, val_size: int = 10000, seed: int = SEED) -> tuple[torch.utils.data.dataset.Subset, ...]:
+def train_val_dataset_split(
+    dataset: torchvision.datasets.mnist.MNIST, val_size: int = 10000, seed: int = SEED
+) -> tuple[torch.utils.data.dataset.Subset, ...]:
   """Return train - validation split given a torch dataset"""
   # Create a seeded rng to determinstically get a validation set
   rng = torch.Generator().manual_seed(seed)
   train_set, val_set = torch.utils.data.random_split(
-      dataset, [len(dataset) - val_size, val_size], generator=rng)
+      dataset, [len(dataset) - val_size, val_size], generator=rng
+  )
   logger.info("Train set: %s", len(train_set))
   logger.info("Valid set: %s", len(val_set))
   return train_set, val_set
@@ -104,6 +113,7 @@ class Metrics:
     train_precision: precision (accuracy) on train set after each epock
     valid_precision: precision (accuracy) on validation set after each epoch
   """
+
   train_batch_loss: list[float] = field(default_factory=list)
   train_precision_epoch: list[float] = field(default_factory=list)
   valid_precision_epoch: list[float] = field(default_factory=list)
@@ -120,6 +130,7 @@ class DigitClassifierConfig(YAMLWizard):
     device: torch device type (cuda or cpu)
     mini_batch: size of mini batch on training and validation set
   """
+
   sizes: tuple[int, ...]
   learning_rate: float
   # loss: nn.modules.loss.MSELoss
@@ -129,7 +140,6 @@ class DigitClassifierConfig(YAMLWizard):
 
 
 class DigitClassifier(nn.Module):
-
   # Some constants to define how the model and params are stored
   MODEL_FILENAME = "model.tar"
   CONFIG_FILENAME = "config.pkl"
@@ -148,22 +158,35 @@ class DigitClassifier(nn.Module):
     self.act_fn = nn.Sigmoid()
     # Define linear weights between each layer:
     self.linears = nn.ModuleList(
-        [nn.Linear(ip, op)
-         for ip, op in zip(self.config.sizes, self.config.sizes[1:])]
+        [
+            nn.Linear(ip, op)
+            for ip, op in zip(self.config.sizes, self.config.sizes[1:])
+        ]
     )
 
     self.num_classes = self.config.sizes[-1]
     self.optimizer = torch.optim.SGD(
-        self.parameters(), lr=self.config.learning_rate)
+        self.parameters(), lr=self.config.learning_rate
+    )
     self.loss_module = self.config.loss
 
     # Load train and validation data
     train_data, _ = train_test_datasets()
     train_set, val_set = train_val_dataset_split(train_data)
     self.train_dataloader = DataLoader(
-        train_set, batch_size=self.config.mini_batch, shuffle=True, num_workers=0, drop_last=False)
+        train_set,
+        batch_size=self.config.mini_batch,
+        shuffle=True,
+        num_workers=0,
+        drop_last=False,
+    )
     self.val_dataloader = DataLoader(
-        val_set, batch_size=self.config.mini_batch, shuffle=False, num_workers=0, drop_last=False)
+        val_set,
+        batch_size=self.config.mini_batch,
+        shuffle=False,
+        num_workers=0,
+        drop_last=False,
+    )
 
     # Set device
     self.to(self.config.device)
@@ -178,18 +201,18 @@ class DigitClassifier(nn.Module):
     # Save params
     self.config.to_yaml_file(str(model_dir / "config.yaml"))
     config_path = model_dir / DigitClassifier.CONFIG_FILENAME
-    with open(config_path, 'wb') as f:
+    with open(config_path, "wb") as f:
       pickle.dump(self.config, f)
 
     return model_path, config_path
 
   @staticmethod
-  def load_model(model_dir: Path) -> 'DigitClassifier':
+  def load_model(model_dir: Path) -> "DigitClassifier":
     """Load model from model_path and return an instance of the model"""
     if not model_dir.is_dir():
       raise FileNotFoundError
     # Load config
-    with open(model_dir / DigitClassifier.CONFIG_FILENAME, 'rb') as f:
+    with open(model_dir / DigitClassifier.CONFIG_FILENAME, "rb") as f:
       config = pickle.load(f)
     # config = DigitClassifierConfig.from_yaml_file(str(config_path))
     model = DigitClassifier(config)
@@ -293,7 +316,8 @@ class DigitClassifier(nn.Module):
     weights = self.linears[from_layer].weight
     if to_next_layer_node > len(weights):
       raise ValueError(
-          f"Next layer has {len(weights)} nodes bu got {to_next_layer_node}")
+          f"Next layer has {len(weights)} nodes bu got {to_next_layer_node}"
+      )
     return weights[to_next_layer_node].detach().cpu()
 
 
@@ -308,7 +332,7 @@ if __name__ == "__main__":
       sizes=[784, 30, 10],
       learning_rate=3,
       device=DEVICE,
-      loss=nn.MSELoss(reduction='mean'),
+      loss=nn.MSELoss(reduction="mean"),
       mini_batch=10000,
   )
   model = DigitClassifier(model_config)

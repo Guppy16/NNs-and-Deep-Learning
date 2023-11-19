@@ -4,7 +4,12 @@ This repo tracks my notes and exercises while completing the book [Neural Networ
 
 <figure>
   <img src="./resources/figures/digit_weights_mse.gif"  width="250" alt="weight masks">
-  <figcaption><em>Weights learnt for each digit in a NN with <b>no</b> hidden layer. This is equivalent to applying a mask / linear transformation.</em></figcaption>
+  <figcaption><em>Weights learnt for each digit in a NN with <b>no</b> hidden layer. This is equivalent to applying a mask / linear transformation. See <a href="./experiments/chap1-no_hidden_layer-MSE_loss.ipynb">this notebook</a> for implementation.</em></figcaption>
+</figure>
+
+<figure>
+  <img src="./experiments/latent-space/latent_space.gif"  width="250" alt="weight masks">
+  <figcaption><em>Visualising hidden layer with 3 nodes (NN layers: {784,10,3,10}). As epoch increases, the learnt weights push the digits to a corner. Interestingly, digits 4 and 9 are stuck together! See <a href="./experiments/latent-space/">this folder</a> for implementation.</em></figcaption>
 </figure>
 
 ## Organisation
@@ -42,3 +47,4 @@ There are many possible avenues to explore with optimising Neural Nets:
   - [ ] Dropout
   - [ ] ~~Dataset Augmentation~~
 - [ ] Softmax in the output layer (This may be demonstrated in a later chapter)
+- [x] Visualising hidden layer

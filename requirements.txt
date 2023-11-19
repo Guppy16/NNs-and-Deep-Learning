@@ -1,0 +1,7 @@
+dataclass-wizard==0.22.2
+ipython==8.16.1
+mypy==1.6.1
+numpy==1.26.1
+seaborn==0.13.0
+torch==2.1.0
+torchvision==0.16.0
