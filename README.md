@@ -2,10 +2,10 @@
 
 This repo tracks my notes and exercises while completing the book [Neural Networks and Deep Learning](http://neuralnetworksanddeeplearning.com/index.html).
 
-![Initial Layer weights](resources/figures/digit_weights_mse.gif)
-
-> This gif shows the weights learnt for each digit in a NN with no hidden layer. This is equivalent to applying a mask (linear transformation).
-
+<figure>
+  <img src="./resources/figures/digit_weights_mse.gif"  width="250" alt="weight masks">
+  <figcaption><em>Weights learnt for each digit in a NN with <b>no</b> hidden layer. This is equivalent to applying a mask / linear transformation.</em></figcaption>
+</figure>
 
 ## Organisation
 
@@ -16,15 +16,15 @@ notes/        - markdown notes for each chapter
 resources/    - store dataset, model and figures
 ```
 
-The bulk of the Neural Network class is in `experiments/digit_classifier.py`. This has been implemented using PyTorch. 
+The bulk of the Neural Network class is in [`experiments/digit_classifier.py`](experiments\digit_classifier.py). This has been implemented using PyTorch. 
 
 ## Chapter Notes
 
 For each chapter, I have written some notes and answers to most exercises / problems:
 
-- [Chap 1](notes/chap1.md)
-- [Chap 2](notes/chap2.md)
-- [Chap 3](notes/chap3.md)
+- [1 Neural Network Intro](<notes/1 NNs Intro.md>)
+- [2 Backpropogation](<notes/2 Backpropogation.md>)
+- [3 Improving Learning](<notes/3 Improving Learning.md>)
 
 This is a WIP; I have yet to do the later chapters.
 

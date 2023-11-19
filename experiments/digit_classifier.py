@@ -275,6 +275,17 @@ class DigitClassifier(nn.Module):
 
     return true_positives / len(labels)
 
+  def layer_weights(self, from_layer: int, to_next_layer_node: int) -> Tensor:
+    """Return detached weights from a layer to a node in the next layer"""
+
+    if from_layer > self.num_layers:
+      raise ValueError(f"Model has {self.num_layers} but got {from_layer}")
+    weights = self.linears[from_layer].weight
+    if to_next_layer_node > len(weights):
+      raise ValueError(
+          f"Next layer has {len(weights)} nodes bu got {to_next_layer_node}")
+    return weights[to_next_layer_node].detach().cpu()
+
 
 def base() -> None:
   """Run some default configurations"""

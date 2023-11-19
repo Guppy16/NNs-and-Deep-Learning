@@ -43,7 +43,7 @@ $$
 
 ## Hadamard product
 
-- element-wise product of two matrices of the same dimension commonly referred to as _Hadamard product_ or _Schur product_:
+Element-wise product of two matrices of the same dimension commonly referred to as _Hadamard product_ or _Schur product_:
 
 ```math
 \begin{bmatrix}
