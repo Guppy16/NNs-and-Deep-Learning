@@ -5,11 +5,20 @@ import logging
 from pathlib import Path
 import os
 import sys
+from torch.utils.tensorboard import SummaryWriter
+
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 SEED: int = 16  # Random seed
 RESOURCES = Path(f"{dir_path}/../resources/")  # Path to resources
 logging.basicConfig(level=logging.INFO)
+
+
+class TBLogger(SummaryWriter):
+    """Tensorboard Logger"""
+
+    def __init__(self, log_dir: Path):
+        super(TBLogger, self).__init__(log_dir)
 
 
 def setup_logger() -> logging.Logger:
@@ -27,6 +36,9 @@ def setup_logger() -> logging.Logger:
 
 
 logger = setup_logger()
+
+logger.info("Resources path: %s", RESOURCES)
+
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
 # Set device
