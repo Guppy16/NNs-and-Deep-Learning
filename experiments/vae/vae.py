@@ -6,12 +6,13 @@ import torch.nn as nn
 import numpy as np
 
 from tqdm import tqdm
-from experiments.base import logger, DEVICE, set_seeds, RESOURCES
+from experiments.base import logger, DEVICE, set_seeds, RESOURCES, TBLogger
 from omegaconf import OmegaConf
 from dataclasses import dataclass
 from torch import Tensor
 from torch.optim import Adam, SGD
 from torch.utils.data import DataLoader
+
 
 T = TypeVar("T")
 
@@ -25,7 +26,7 @@ class VAEConfig:
     input_dim: int = 784
     latent_dim: int = 20
 
-    device: str = str(DEVICE)
+    # device: str = str(DEVICE)
 
     batch_size: int = 32
 
@@ -121,16 +122,19 @@ class VAE(nn.Module):
     MODEL_FILENAME = "model.tar"
     CONFIG_FILENAME = "config.yaml"
 
-    def __init__(self, config: VAEConfig):
+    def __init__(self, config: VAEConfig, tb_logger: TBLogger):
         super(VAE, self).__init__()
         self.config = config
-        self.device = torch.device(self.config.device)
+        self.device = torch.device(DEVICE)
 
         self.encoder = Encoder(config)
         self.decoder = Decoder(config)
 
         self.to(self.device)
         self.optimizer = Adam(self.parameters(), lr=self.config.lr)
+
+        self.tb_logger = tb_logger
+        self.global_step = 0  # For tensorboard logging
 
     def reparemeteraize(self, mu: Tensor, log_var: Tensor) -> Tensor:
         """Reparameterization trick to sample z from N(mu, var) distribution.
@@ -181,8 +185,13 @@ class VAE(nn.Module):
         x: batch x img_dim, e.g. 32 x 768
 
         """
-        reproduction_loss = nn.functional.mse_loss(x_hat, x, reduction="sum")
+        reproduction_loss = 0.5 * nn.functional.mse_loss(x_hat, x, reduction="sum")
         KLD = -0.5 * torch.sum(1 + log_var - mean.pow(2) - log_var.exp())
+
+        self.tb_logger.add_scalar(
+            "Loss/reconstruction", reproduction_loss, self.global_step
+        )
+        self.tb_logger.add_scalar("Loss/KLD", KLD, self.global_step)
 
         # loss = reproduction_loss + KLD
         loss = reproduction_loss + KLD
@@ -216,10 +225,10 @@ class VAE(nn.Module):
         with open(model_dir / VAE.CONFIG_FILENAME, "r") as f:
             config = OmegaConf.load(f)
 
-        model = VAE(config)
+        model = VAE(config, tb_logger=None)
         # load state dict
         model_path = model_dir / VAE.MODEL_FILENAME
-        state_dict = torch.load(model_path)
+        state_dict = torch.load(model_path, map_location=DEVICE)
         model.load_state_dict(state_dict)
 
         return model
@@ -262,7 +271,10 @@ class VAE(nn.Module):
                         # l = np.nan
                         breakpoint()
                     train_loss += l
+                    self.tb_logger.add_scalar("Loss/train", l, self.global_step)
                     pbar.set_postfix({"Loss": l})
+                    self.global_step += 1
+
                 logger.info(f"Training Loss: {train_loss / len(train_loader)}")
 
             if val_loader is None:
@@ -275,6 +287,9 @@ class VAE(nn.Module):
                 loss = self.loss_function(x, x_hat, mu, log_var)
                 val_loss += loss.item()
             logger.info(f"Validation Loss: {val_loss / len(val_loader)}")
+            self.tb_logger.add_scalar(
+                "Loss/val", val_loss / len(val_loader), self.global_step
+            )
 
 
 if __name__ == "__main__":
