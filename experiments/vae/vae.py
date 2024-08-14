@@ -8,7 +8,7 @@ from experiments.base import logger, DEVICE, set_seeds, RESOURCES, TBLogger
 from omegaconf import OmegaConf
 from dataclasses import dataclass
 from torch import Tensor
-from torch.optim import Adam, SGD
+from torch.optim import AdamW
 from torch.utils.data import DataLoader
 
 
@@ -29,6 +29,7 @@ class VAEConfig:
     batch_size: int = 32
 
     lr: float = 1e-3
+    weight_decay: float = 1e-2
 
     def save_config(self, dir: Path):
         """Save config to model_dir"""
@@ -129,7 +130,9 @@ class VAE(nn.Module):
         self.decoder = Decoder(config)
 
         self.to(self.device)
-        self.optimizer = Adam(self.parameters(), lr=self.config.lr)
+        self.optimizer = AdamW(
+            self.parameters(), lr=self.config.lr, weight_decay=self.config.weight_decay
+        )
 
         self.tb_logger = tb_logger
         self.global_step = 0  # For tensorboard logging
@@ -165,32 +168,6 @@ class VAE(nn.Module):
 
         return x_hat, z, z_dist
 
-        # def loss_function(self, x: Tensor, x_hat: Tensor, mu: Tensor, log_var: Tensor):
-        #     """VAE loss function.
-
-        #     Maximize the ELBO (Evidence Lower Bound) which is the sum of
-        #     Reconstruction loss and KL divergence.
-
-        #     Loss = -ELBO = -E[log P(x|z)] + KL(Q(z|x) || P(z))
-        #          = 0.5 * mean|x - x_hat|^2 + 0.5 * mean(-log_var + mu^2 + var) + C
-
-        #     Args:
-        #         x: batch x input_dim
-        #         x_hat: batch x input_dim
-        #         mu: batch x latent_dim
-        #         log_var: batch x latent_dim
-        #     """
-
-        #     recon_loss = 0.5 * nn.functional.mse_loss(x_hat, x, reduction="mean")
-
-        #     var = torch.exp(log_var)
-        #     kld = 0.5 * torch.sum(
-        #         var + mu.pow(2) - log_var
-        #     )  # Sum over latent dim and batch
-        #     kld = kld / self.config.batch_size  # Average over batch
-
-        #     return recon_loss + kld
-
     def loss_function(
         self,
         x: Tensor,
@@ -202,27 +179,28 @@ class VAE(nn.Module):
         x: batch x img_dim, e.g. 32 x 768
         z: batch x latent_dim, e.g. 32 x 20
         """
-        reproduction_loss = 0.5 * nn.functional.mse_loss(
-            x_hat, x, reduction="none"
-        ).sum(-1).sum(-1)
-        # KLD = -0.5 * torch.sum(1 + log_var - mean.pow(2) - log_var.exp())
+        mse_loss = (
+            0.5 * nn.functional.mse_loss(x_hat, x, reduction="none").sum(-1).mean()
+        )
+        bce_loss = (
+            nn.functional.binary_cross_entropy(x_hat, x, reduction="none")
+            .sum(-1)
+            .mean()
+        )
 
         std_normal_dist = torch.distributions.MultivariateNormal(
             torch.zeros_like(z, device=DEVICE),
-            scale_tril=torch.eye(z.shape[-1], device=DEVICE)
-            .unsqueeze(0)
-            .expand(z.shape[0], -1, -1),
+            scale_tril=torch.eye(z.shape[-1], device=DEVICE)  # L x L
+            .unsqueeze(0)  # 1 x L x L
+            .expand(z.shape[0], -1, -1),  # B x L x L
         )
-        KLD = torch.distributions.kl_divergence(z_dist, std_normal_dist).sum()
+        KLD = torch.distributions.kl_divergence(z_dist, std_normal_dist).mean()
 
-        self.tb_logger.add_scalar(
-            "Loss/reconstruction", reproduction_loss, self.global_step
-        )
+        self.tb_logger.add_scalar("Loss/BCE", bce_loss, self.global_step)
+        self.tb_logger.add_scalar("Loss/MSE", mse_loss, self.global_step)
         self.tb_logger.add_scalar("Loss/KLD", KLD, self.global_step)
 
-        # loss = reproduction_loss + KLD
-        loss = reproduction_loss + KLD
-        # print("loss", loss.detach().cpu())
+        loss = bce_loss + KLD
         return loss
 
     def save_model(self, model_dir: Path) -> tuple[Path, Path]:
