@@ -3,8 +3,6 @@ from typing import List, TypeVar
 import torch
 import torch.nn as nn
 
-import numpy as np
-
 from tqdm import tqdm
 from experiments.base import logger, DEVICE, set_seeds, RESOURCES, TBLogger
 from omegaconf import OmegaConf
@@ -30,7 +28,6 @@ class VAEConfig:
 
     batch_size: int = 32
 
-    leaky_relu: float = 0.2
     lr: float = 1e-3
 
     def save_config(self, dir: Path):
@@ -64,19 +61,19 @@ class Encoder(nn.Module):
             modules.append(
                 nn.Sequential(
                     nn.Linear(in_dim, out_dim),
-                    nn.LeakyReLU(self.config.leaky_relu),
+                    nn.SiLU(),
                 )
             )
             in_dim = out_dim
 
         self.encoder = nn.Sequential(*modules)
         self.mu = nn.Linear(self.config.hidden_dims[-1], self.config.latent_dim)
-        self.var = nn.Linear(self.config.hidden_dims[-1], self.config.latent_dim)
+        self.log_var = nn.Linear(self.config.hidden_dims[-1], self.config.latent_dim)
 
     def forward(self, x: Tensor) -> tuple[Tensor, Tensor]:
         x = self.encoder(x)
         mu = self.mu(x)
-        log_var = self.var(x)
+        log_var = self.log_var(x)
 
         return mu, log_var
 
@@ -96,7 +93,7 @@ class Decoder(nn.Module):
             modules.append(
                 nn.Sequential(
                     nn.Linear(in_dim, out_dim),
-                    nn.LeakyReLU(self.config.leaky_relu),
+                    nn.SiLU(),
                 )
             )
             in_dim = out_dim
@@ -128,6 +125,7 @@ class VAE(nn.Module):
         self.device = torch.device(DEVICE)
 
         self.encoder = Encoder(config)
+        self.softplus = nn.Softplus()
         self.decoder = Decoder(config)
 
         self.to(self.device)
@@ -136,22 +134,36 @@ class VAE(nn.Module):
         self.tb_logger = tb_logger
         self.global_step = 0  # For tensorboard logging
 
-    def reparemeteraize(self, mu: Tensor, log_var: Tensor) -> Tensor:
+    def reparemeterize(self, mu: Tensor, log_var: Tensor) -> Tensor:
         """Reparameterization trick to sample z from N(mu, var) distribution.
 
-        For more stable training, we sample from N(0, 1)
-        and scale and shift by mu and var.
+        z = mu + std * eps
+
+        For more stable training, we use softplus instead of exp for std:
+        std = softplus(log_var) = log(1 + exp(log_var))
+        Hence, in this case, the encoder learns to predict:
+        log_var = log(exp(std) - 1), which isn't exactly the log_var
+        but should be more stable
         """
-        std = torch.exp(0.5 * log_var)  # std = sqrt(var)
+        # std = torch.exp(0.5 * log_var)  # std = sqrt(var)
+        std = self.softplus(log_var)
         eps = torch.randn_like(std).to(self.device)
         return mu + eps * std
 
     def forward(self, x: Tensor):
         mu, log_var = self.encoder(x)
-        z = self.reparemeteraize(mu, log_var)
+
+        # mu, log_var -> N(mu, Σ) distribution
+        scale = self.softplus(log_var)
+        scale_matrix = torch.diag_embed(scale)
+        z_dist = torch.distributions.MultivariateNormal(mu, scale_matrix)
+
+        # Sample z from distribution
+        z: Tensor = z_dist.rsample()  # Sampled using reparameterization trick
+
         x_hat = self.decoder(z)
 
-        return x_hat, mu, log_var
+        return x_hat, z, z_dist
 
         # def loss_function(self, x: Tensor, x_hat: Tensor, mu: Tensor, log_var: Tensor):
         #     """VAE loss function.
@@ -179,14 +191,29 @@ class VAE(nn.Module):
 
         #     return recon_loss + kld
 
-    def loss_function(self, x, x_hat, mean, log_var):
-        """
-
+    def loss_function(
+        self,
+        x: Tensor,
+        x_hat: Tensor,
+        z: Tensor,
+        z_dist: torch.distributions.Distribution,
+    ):
+        """Return loss = reconstruction_loss + KLD
         x: batch x img_dim, e.g. 32 x 768
-
+        z: batch x latent_dim, e.g. 32 x 20
         """
-        reproduction_loss = 0.5 * nn.functional.mse_loss(x_hat, x, reduction="sum")
-        KLD = -0.5 * torch.sum(1 + log_var - mean.pow(2) - log_var.exp())
+        reproduction_loss = 0.5 * nn.functional.mse_loss(
+            x_hat, x, reduction="none"
+        ).sum(-1).sum(-1)
+        # KLD = -0.5 * torch.sum(1 + log_var - mean.pow(2) - log_var.exp())
+
+        std_normal_dist = torch.distributions.MultivariateNormal(
+            torch.zeros_like(z, device=DEVICE),
+            scale_tril=torch.eye(z.shape[-1], device=DEVICE)
+            .unsqueeze(0)
+            .expand(z.shape[0], -1, -1),
+        )
+        KLD = torch.distributions.kl_divergence(z_dist, std_normal_dist).sum()
 
         self.tb_logger.add_scalar(
             "Loss/reconstruction", reproduction_loss, self.global_step
@@ -206,6 +233,7 @@ class VAE(nn.Module):
         # save model
         model_path = model_dir / VAE.MODEL_FILENAME
         torch.save(self.state_dict(), model_path)
+        logger.info("Model saved to %s ", model_path)
 
         # save params
         conf = OmegaConf.to_yaml(self.config)
