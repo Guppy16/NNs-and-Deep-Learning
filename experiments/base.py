@@ -57,3 +57,8 @@ def set_seeds(seed: int = SEED) -> None:
     torch.backends.cudnn.benchmark = False
     # Create a rng
     # rng = torch.Generator().manual_seed(seed)
+
+
+def count_parameters(model: torch.nn.Module) -> int:
+    """Count the number of parameters in a model"""
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)

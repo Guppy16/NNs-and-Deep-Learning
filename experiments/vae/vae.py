@@ -4,7 +4,14 @@ import torch
 import torch.nn as nn
 
 from tqdm import tqdm
-from experiments.base import logger, DEVICE, set_seeds, RESOURCES, TBLogger
+from experiments.base import (
+    logger,
+    DEVICE,
+    set_seeds,
+    RESOURCES,
+    TBLogger,
+    count_parameters,
+)
 from omegaconf import OmegaConf
 from dataclasses import dataclass
 from torch import Tensor
@@ -24,7 +31,7 @@ class VAEConfig:
     input_dim: int = 784
     latent_dim: int = 20
 
-    # device: str = str(DEVICE)
+    beta: float = 1.0  # Beta-VAE parameter
 
     batch_size: int = 32
 
@@ -137,6 +144,15 @@ class VAE(nn.Module):
         self.tb_logger = tb_logger
         self.global_step = 0  # For tensorboard logging
 
+    def repr_parameters(self):
+        """Return model parameters"""
+        params = {
+            "encoder": count_parameters(self.encoder),
+            "decoder": count_parameters(self.decoder),
+            "total": count_parameters(self),
+        }
+        return params
+
     def reparemeterize(self, mu: Tensor, log_var: Tensor) -> Tensor:
         """Reparameterization trick to sample z from N(mu, var) distribution.
 
@@ -174,6 +190,7 @@ class VAE(nn.Module):
         x_hat: Tensor,
         z: Tensor,
         z_dist: torch.distributions.Distribution,
+        tb_log_to: str = "Loss/train",
     ):
         """Return loss = reconstruction_loss + KLD
         x: batch x img_dim, e.g. 32 x 768
@@ -196,11 +213,11 @@ class VAE(nn.Module):
         )
         KLD = torch.distributions.kl_divergence(z_dist, std_normal_dist).mean()
 
-        self.tb_logger.add_scalar("Loss/BCE", bce_loss, self.global_step)
-        self.tb_logger.add_scalar("Loss/MSE", mse_loss, self.global_step)
-        self.tb_logger.add_scalar("Loss/KLD", KLD, self.global_step)
+        self.tb_logger.add_scalar(f"{tb_log_to}/BCE", bce_loss, self.global_step)
+        self.tb_logger.add_scalar(f"{tb_log_to}/MSE", mse_loss, self.global_step)
+        self.tb_logger.add_scalar(f"{tb_log_to}/KLD", KLD, self.global_step)
 
-        loss = bce_loss + KLD
+        loss = bce_loss + self.config.beta * KLD
         return loss
 
     def save_model(self, model_dir: Path) -> tuple[Path, Path]:
@@ -245,6 +262,8 @@ class VAE(nn.Module):
         epochs: int,
         train_loader: DataLoader[T],
         val_loader: DataLoader[T] | None = None,
+        on_nbatch_end: callable = None,
+        on_nbatch_end_freq: int = 100,
     ):
         for epoch in tqdm(range(epochs), desc="Epochs"):
             self.train()
@@ -256,15 +275,15 @@ class VAE(nn.Module):
                 desc=f"Epoch {epoch + 1}",
                 disable=False,
             ) as pbar:
-                for batch_idx, x in pbar:
+                for batch_idx, (x, labels) in pbar:
                     # 1. Move input to device
                     x = x.to(self.device)
                     # 2. Zero the gradients
                     self.optimizer.zero_grad()
                     # 3. Forward pass
-                    x_hat, mu, log_var = self(x)
+                    x_hat, z, z_dist = self(x)
                     # 4. Compute loss
-                    loss = self.loss_function(x, x_hat, mu, log_var)
+                    loss = self.loss_function(x, x_hat, z, z_dist)
                     # 5. Backward pass
                     loss.backward()
                     # 6. Update weights
@@ -281,21 +300,58 @@ class VAE(nn.Module):
                     pbar.set_postfix({"Loss": l})
                     self.global_step += 1
 
+                    # Callback (useful for debugging / visualization)
+                    if (
+                        on_nbatch_end is not None
+                        and batch_idx % on_nbatch_end_freq == 0
+                    ):
+                        self.eval()
+                        on_nbatch_end(
+                            model=self,
+                            epoch_idx=epoch,
+                            batch_idx=batch_idx,
+                            x=x,
+                            x_hat=x_hat,
+                            z=z,
+                            z_dist=z_dist,
+                            labels=labels,
+                        )
+                        self.train()
+
                 logger.info(f"Training Loss: {train_loss / len(train_loader)}")
 
             if val_loader is None:
                 continue
             self.eval()
             val_loss = 0
-            for x in val_loader:
+            for x, labels in val_loader:
                 x = x.to(self.device)
-                x_hat, mu, log_var = self(x)
-                loss = self.loss_function(x, x_hat, mu, log_var)
+                x_hat, z, z_dist = self(x)
+                loss = self.loss_function(x, x_hat, z, z_dist, tb_log_to="Loss/val")
                 val_loss += loss.item()
             logger.info(f"Validation Loss: {val_loss / len(val_loader)}")
             self.tb_logger.add_scalar(
                 "Loss/val", val_loss / len(val_loader), self.global_step
             )
+
+
+def callback_save_zdist(
+    model: VAE,
+    z_dist: torch.distributions.Distribution,
+    labels: Tensor,
+    epoch_idx: int,
+    batch_idx: int,
+    **kwargs,
+):
+    """Callback to save distribution of z as pytorch files"""
+    fpath = Path(model.tb_logger.log_dir).parent / "z_dist"
+    fpath.mkdir(parents=True, exist_ok=True)
+
+    fname = f"z_dist_{epoch_idx:03d}_{batch_idx:05d}.pt"
+    torch.save(z_dist.detach().cpu(), fpath / fname)
+
+    fname = f"labels_{epoch_idx:03d}_{batch_idx:05d}.pt"
+    torch.save(labels.detach().cpu(), fpath / fname)
 
 
 if __name__ == "__main__":

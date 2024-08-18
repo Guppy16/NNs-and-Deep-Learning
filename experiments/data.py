@@ -4,10 +4,10 @@ from typing import TypeVar
 from experiments.base import RESOURCES, SEED, logger
 
 import torch
-from torchvision.utils import save_image, make_grid  # type: ignore
 from torchvision.datasets import MNIST  # type: ignore
-from torchvision.transforms import transforms  # type: ignore
+from torchvision.transforms import v2  # type: ignore
 from torch.utils.data import DataLoader, random_split, Subset, Dataset
+
 
 from pathlib import Path
 
@@ -20,10 +20,10 @@ def MNISTDataset(
     """Get training and test set from MNIST"""
 
     # Transform data
-    t = transforms.Compose(
+    t = v2.Compose(
         [
-            transforms.PILToTensor(),
-            transforms.ConvertImageDtype(torch.float),
+            v2.ToImage(),
+            v2.ToDtype(torch.float32, scale=True),  # scale to [0, 1]
             torch.flatten,
         ]
     )
