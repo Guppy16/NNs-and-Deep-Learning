@@ -50,3 +50,8 @@ def train_val_dataset_split(
     logger.info("Train set: %s", len(train_set))
     logger.info("Valid set: %s", len(val_set))
     return train_set, val_set
+
+
+if __name__ == "__main__":
+    train_set, test_set = MNISTDataset()
+    train_set, val_set = train_val_dataset_split(train_set, val_size=10000)
