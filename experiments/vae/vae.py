@@ -262,11 +262,9 @@ class VAE(nn.Module):
         epochs: int,
         train_loader: DataLoader[T],
         val_loader: DataLoader[T] | None = None,
-        on_nbatch_end: callable = None,
-        on_nbatch_end_freq: int = 100,
+        on_batch_end: callable = None,
     ):
         for epoch in tqdm(range(epochs), desc="Epochs"):
-            self.train()
             train_loss = 0
             with tqdm(
                 enumerate(train_loader),
@@ -276,6 +274,7 @@ class VAE(nn.Module):
                 disable=False,
             ) as pbar:
                 for batch_idx, (x, labels) in pbar:
+                    self.train()
                     # 1. Move input to device
                     x = x.to(self.device)
                     # 2. Zero the gradients
@@ -301,22 +300,17 @@ class VAE(nn.Module):
                     self.global_step += 1
 
                     # Callback (useful for debugging / visualization)
-                    if (
-                        on_nbatch_end is not None
-                        and batch_idx % on_nbatch_end_freq == 0
-                    ):
-                        self.eval()
-                        on_nbatch_end(
-                            model=self,
-                            epoch_idx=epoch,
-                            batch_idx=batch_idx,
-                            x=x,
-                            x_hat=x_hat,
-                            z=z,
-                            z_dist=z_dist,
-                            labels=labels,
-                        )
-                        self.train()
+                    self.eval()
+                    on_batch_end(
+                        model=self,
+                        epoch_idx=epoch,
+                        batch_idx=batch_idx,
+                        x=x,
+                        x_hat=x_hat,
+                        z=z,
+                        z_dist=z_dist,
+                        labels=labels,
+                    )
 
                 logger.info(f"Training Loss: {train_loss / len(train_loader)}")
 
