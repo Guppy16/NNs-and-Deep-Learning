@@ -1,18 +1,58 @@
-# NNs-and-Deep-Learning
+# NNs and Deep Learning
 
-This repo tracks my notes and exercises while completing the book [Neural Networks and Deep Learning](http://neuralnetworksanddeeplearning.com/index.html).
+This repo contains a portfolio of experiments and notes on NNs and DL. The aim is twofold:
+
+- use visualisations to understand the latent space when a NN is training
+- keep up to date with NN programming practices
+
+### Visualising the Latent Space of a beta-VAE
+
+> The KL loss in a VAE encourages the encoder to map inputs to latents that are close to the prior distribution $\mathcal{N}(0, I)$. We can visualise this distribution for each class in the MNIST dataset by approximating it as a _Mixture of Gaussians_.
+
+<div>
+<div style="display: flex; justify-content: space-between;">
+  <!-- First Image Block -->
+  <figure style="text-align: center; margin-right: 20px;">
+    <figcaption>Standard VAE (β = 1)</figcaption>
+    <img src="experiments/vae/vis/class_latents_20240830-194511l2_e1.gif" alt="Standard VAE" style="max-width: 250px; height: auto;">
+    <figcaption><em>The class distributions converge to very different distributions. Digit 0 has a larger spread.</em></figcaption>
+  </figure>
+
+  <!-- Second Image Block -->
+  <figure style="text-align: center; margin-left: 20px;">
+    <figcaption>β = 10</figcaption>
+    <img src="experiments/vae/vis/class_latents_20240830-221914l2_e1+b10.gif" alt="Image 2" style="max-width: 250px; height: auto;">
+    <figcaption><em>
+    The distribution shapes are more similar, but they still try to converge to different locations. 
+    </em></figcaption>
+  </figure>
+</div>
+<p align="center">
+<em>
+Both VAEs have the same architecture with a 2D latent space, and were trained for a single epoch. In both cases, the model learns to try and separate the the location of the class distributions, however there is significant overlap between the numbers 4 and 9, which is to be expected. The shapes of the distributions are very similar in the beta VAE, which is due the stronger KL loss. 
+</em>
+</p>
+</div>
+
+### Separable Latent Space in Classification
+
+> In classification tasks, a NN learns weights so that it is able to create simple decision boundaries to separate classes in the latent space.
 
 <figure>
-  <img src="./experiments/classifier/latent-space/latent_space.gif"  width="250" alt="weight masks">
-  <figcaption><em>Visualising hidden layer with 3 nodes (NN layers: {784,10,3,10}). As epoch increases, the learnt weights push each digit class to a corner. Interestingly, digits 4 and 9 are stuck together! See <a href="./experiments/classifier/latent-space/">this folder</a> for implementation.</em></figcaption>
+  <p align="center">
+    <img src="./experiments/classifier/latent-space/latent_space.gif"  width="250" alt="weight masks" >
+  </p>
+  <figcaption><em>Visualising hidden layer with 3 nodes - each has its own axis (NN layers: {784,10,3,10}). As epoch increases, the learnt weights push each digit class to a corner. Unsurprisingly, digits 4 and 9 have significant overlap! See <a href="./experiments/classifier/latent-space/">this folder</a> for implementation.</em></figcaption>
 </figure>
 
-<br/>
-<br/>
-<br/>
+### Linear Transformation as a Mask in Classification
+
+> When there is no non-linearity in the NN, the weights are equivalent to a single linear transformation. In the case of classification, intuitively, we are applying a mask on the input.
 
 <figure>
-  <img src="./resources/figures/digit_weights_mse.gif"  width="250" alt="weight masks">
+  <p align="center">
+    <img src="./resources/figures/digit_weights_mse.gif"  width="250" alt="weight masks">
+  </p>
   <figcaption><em>Weights learnt for each digit in a NN with <b>no</b> hidden layer. This is equivalent to applying a mask / linear transformation. See <a href="./experiments/classifier/chap1-no_hidden_layer-MSE_loss.ipynb">this notebook</a> for implementation.</em></figcaption>
 </figure>
 
@@ -21,13 +61,13 @@ This repo tracks my notes and exercises while completing the book [Neural Networ
 ```
 README.md
 experiments/  - NN PyTorch class, training experiments
-notes/        - markdown notes for each chapter
+notes/        - markdown notes for experiments and theory
 resources/    - store dataset, model and figures
 ```
 
-The bulk of the Neural Network class is in [`experiments/classifier/digit_classifier.py`](experiments/classifier/digit_classifier.py). This has been implemented using PyTorch. 
+## Notes
 
-## Chapter Notes
+The [`notes/`](<notes/>) folder contains markdown notes on the relevant NN theory required for the experiments. It also contains notes and exercises from the book [Neural Networks and Deep Learning](http://neuralnetworksanddeeplearning.com/index.html).
 
 For each chapter, I have written some notes and answers to most exercises / problems:
 
@@ -36,26 +76,65 @@ For each chapter, I have written some notes and answers to most exercises / prob
 - [3 Improving Learning](<notes/3 Improving Learning.md>)
 
 This is a WIP; I have yet to do the later chapters.
+I also aim to cover the following topics:
 
-## Experiment Ideas
+- Notes on Activation Functions
+  - Swish, softplus (for VAE to predict variance)
+- Regularisation: L1, L2, Dropout, [Continual Backprop](https://www.nature.com/articles/s41586-024-07711-7)
+- Grid search over batch-size, lr using hydra
 
-### Optimising Neural Nets
+## Framework for Experiments
 
-There are many possible avenues to explore with optimising Neural Nets:
+This documents the best practices I have learnt for programming NNs.
 
-- [ ] Grid search over batch-size, lr using hydra
-- [ ] Regularisation: L1, L2, Dropout
+### Pytorch training loop
 
-### VAEs
+```python
+def train_loop(self, ...):
+  for epoch in range(epochs):
+    for batch in dataloader:
+      self.train()
+      # 1. Move data to device
+      batch = batch.to(device) 
+      # 2. Zero gradients
+      self.optimizer.zero_grad()
+      # 3. Forward pass
+      output = self.model(batch)
+      # 4. Compute loss
+      loss = self.loss_function(output, batch)
+      # 5. Backward pass
+      loss.backward()
+      # 6. Update weights
+      self.optimizer.step()
+```
 
-- [ ] Visualise training of latent space in 2D / 3D - does this have the same representation as the classification exercise?
-  - There are three phases to the KL loss (which is very apparent for `latent_dim=8`):
-    1. KLD starts high, due to random initialisation of the model.
-    2. KLD drops almost to 0, as the model learns to encode as a Gaussian very easily
-    3. KLD rises sharply to compensate for the high MSE reconstruction loss. 
-    4. KLD increases slowly to match the MSE loss.
-- [ ] Train beta-VAE for disentangle latent space.
-  - compare latent space training
-  - show how sliders affect the reconstruction: vary the value of each latent from -3 to 3 (3 sigmas)
-- [ ] Find path that traverses all digits in latent space
-- [ ] Classify digits in complete latent space (would be best to have a confined latent space)
+### omegaconf + dataclass
+
+configuring NNs and storing (hyper)parameters
+
+```python
+@dataclass
+class ModelConfig:
+  # model parameters
+  hidden_dim: int = 128
+  # training parameters
+  lr: float = 1e-3
+  batch_size: int = 32
+
+  def save_config(self, path: Path):
+    OmegaConf.save(OmegaConf.to_yaml(self), path)
+
+  @staticmethod
+  def load_config(path: Path) -> "ModelConfig":
+    conf = OmegaConf.load(path)
+    return ModelConfig(**conf)
+```
+
+### Tensorboard
+
+for logging: see [`base.py`](<experiments/base.py>)
+
+A list of potential avenues to explore:
+
+- pytorch-lightning
+- hydra
