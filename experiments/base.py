@@ -6,6 +6,8 @@ from pathlib import Path
 import os
 import sys
 from torch.utils.tensorboard import SummaryWriter
+from typing import TypeVar, Type
+from omegaconf import OmegaConf
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -62,3 +64,27 @@ def set_seeds(seed: int = SEED) -> None:
 def count_parameters(model: torch.nn.Module) -> int:
     """Count the number of parameters in a model"""
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+
+T = TypeVar("TBaseConfig", bound="BaseConfig")
+
+
+class BaseConfig:
+    """Base configuration class"""
+
+    CONFIG_FILENAME = "config.yaml"
+
+    def save_config(self, conf_path: Path):
+        """Save config to model_dir"""
+        conf = OmegaConf.to_yaml(self)
+        conf_path.mkdir(parents=True, exist_ok=True)
+        conf_path = conf_path / self.CONFIG_FILENAME
+        OmegaConf.save(self, conf_path)
+        return conf_path
+
+    @classmethod
+    def load_config(cls: Type[T], fpath: Path) -> T:
+        """Load config from file path"""
+        config = OmegaConf.load(fpath)
+        conf = cls(**config)
+        return conf

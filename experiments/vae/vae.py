@@ -351,8 +351,8 @@ def callback_save_zdist(
 if __name__ == "__main__":
     set_seeds()
     config = VAEConfig(hidden_dims=(400, 200), lr=1e-2)
-    model = VAE(config)
     model_dir = RESOURCES / "models" / "vae" / "test"
+    model = VAE(config, TBLLogger(model_dir))
 
     # Save model
     model.save_model(model_dir)
