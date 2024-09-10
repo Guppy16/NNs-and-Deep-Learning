@@ -23,13 +23,13 @@ This repo contains a portfolio of experiments and notes on NNs and DL. The aim i
     <figcaption>β = 10</figcaption>
     <img src="experiments/vae/vis/class_latents_20240830-221914l2_e1+b10.gif" alt="Image 2" style="max-width: 250px; height: auto;">
     <figcaption><em>
-    The distribution shapes are more similar, but they still try to converge to different locations. 
+    The distribution shapes are more similar, but they still try to converge to different locations.
     </em></figcaption>
   </figure>
 </div>
 <p align="center">
 <em>
-Both VAEs have the same architecture with a 2D latent space, and were trained for a single epoch. In both cases, the model learns to try and separate the the location of the class distributions, however there is significant overlap between the numbers 4 and 9, which is to be expected. The shapes of the distributions are very similar in the beta VAE, which is due the stronger KL loss. 
+Both VAEs have the same architecture with a 2D latent space, and were trained for a single epoch. In both cases, the model learns to try and separate the the location of the class distributions, however there is significant overlap between the numbers 4 and 9, which is to be expected. The shapes of the distributions are very similar in the beta VAE, which is due the stronger KL loss.
 </em>
 </p>
 </div>
@@ -138,3 +138,4 @@ A list of potential avenues to explore:
 
 - pytorch-lightning
 - hydra
+- fire
