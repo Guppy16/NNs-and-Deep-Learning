@@ -7,27 +7,32 @@ This repo contains a portfolio of experiments and notes on NNs and DL. The aim i
 
 ### Visualising the Latent Space of a beta-VAE
 
-> The KL loss in a VAE encourages the encoder to map inputs to latents that are close to the prior distribution $\mathcal{N}(0, I)$. We can visualise this distribution for each class in the MNIST dataset by approximating it as a _Mixture of Gaussians_.
+> The KL loss in a VAE encourages the encoder to map inputs to latents that are close to the prior distribution $\mathcal{N}(0, I)$. We can visualise this distribution for each class in the MNIST dataset by approximating it as a _Mixture of Gaussians_. 
 
 <div>
-<div style="display: flex; justify-content: space-between;">
+<div style="justify-content: space-between;">
   <!-- First Image Block -->
-  <figure style="text-align: center; margin-right: 20px;">
-    <figcaption>Standard VAE (β = 1)</figcaption>
-    <img src="experiments/vae/vis/class_latents_20240830-194511l2_e1.gif" alt="Standard VAE" style="max-width: 250px; height: auto;">
+  <figure>
+    <p align="center">Standard VAE (β = 1)<br></p>
+    <p align="center">
+    <img src="experiments/vae/vis/class_latents_20240830-194511l2_e1.gif" alt="Standard VAE" width="300">
+      </p>
     <figcaption><em>The class distributions converge to very different distributions. Digit 0 has a larger spread.</em></figcaption>
   </figure>
 
   <!-- Second Image Block -->
   <figure style="text-align: center; margin-left: 20px;">
-    <figcaption>β = 10</figcaption>
-    <img src="experiments/vae/vis/class_latents_20240830-221914l2_e1+b10.gif" alt="Image 2" style="max-width: 250px; height: auto;">
+    <p align="center">β = 10<br></p>
+    <p align="center">
+    <img src="experiments/vae/vis/class_latents_20240830-221914l2_e1+b10.gif" alt="Image 2" width="300">
+    </p>
     <figcaption><em>
     The distribution shapes are more similar, but they still try to converge to different locations.
     </em></figcaption>
   </figure>
 </div>
-<p align="center">
+<p align="left">
+  <br>
 <em>
 Both VAEs have the same architecture with a 2D latent space, and were trained for a single epoch. In both cases, the model learns to try and separate the the location of the class distributions, however there is significant overlap between the numbers 4 and 9, which is to be expected. The shapes of the distributions are very similar in the beta VAE, which is due the stronger KL loss.
 </em>
