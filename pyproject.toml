@@ -1,0 +1,22 @@
+[project]
+name = "experiments"
+version = "0.0.1"
+authors = [{ name = "Akash Gupta", email = "guptaalgebra@gmail.com" }]
+dependencies = [
+    "dataclass-wizard",
+    "ipython",
+    "mypy",
+    "numpy",
+    "seaborn",
+    "torch",
+    "torchvision",
+    "omegaconf",
+    "tensorboard",
+    "einops",
+    "jaxtyping",
+    "pillow",
+    "tqdm"
+]
+
+[tool.setuptools]
+packages = ["experiments"]

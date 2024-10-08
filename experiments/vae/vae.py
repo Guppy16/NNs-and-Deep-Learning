@@ -3,6 +3,7 @@ from typing import List, TypeVar
 import torch
 import torch.nn as nn
 
+
 from tqdm import tqdm
 from experiments.base import (
     logger,
@@ -301,16 +302,17 @@ class VAE(nn.Module):
 
                     # Callback (useful for debugging / visualization)
                     self.eval()
-                    on_batch_end(
-                        model=self,
-                        epoch_idx=epoch,
-                        batch_idx=batch_idx,
-                        x=x,
-                        x_hat=x_hat,
-                        z=z,
-                        z_dist=z_dist,
-                        labels=labels,
-                    )
+                    if on_batch_end is not None:
+                        on_batch_end(
+                            model=self,
+                            epoch_idx=epoch,
+                            batch_idx=batch_idx,
+                            x=x,
+                            x_hat=x_hat,
+                            z=z,
+                            z_dist=z_dist,
+                            labels=labels,
+                        )
 
                 logger.info(f"Training Loss: {train_loss / len(train_loader)}")
 
@@ -352,7 +354,7 @@ if __name__ == "__main__":
     set_seeds()
     config = VAEConfig(hidden_dims=(400, 200), lr=1e-2)
     model_dir = RESOURCES / "models" / "vae" / "test"
-    model = VAE(config, TBLLogger(model_dir))
+    model = VAE(config, TBLogger(model_dir))
 
     # Save model
     model.save_model(model_dir)
@@ -362,8 +364,13 @@ if __name__ == "__main__":
     assert m.config == config
 
     # Create simple artificial train set of 1 image
-    x = torch.rand(1, 784)
-    train_loader = DataLoader(x, batch_size=1)
+    x = torch.rand(784)
+    train_loader = DataLoader(
+        [
+            (x, 1),
+        ],
+        batch_size=1,
+    )
 
     # Train model
     model.train_loop(epochs=3, train_loader=train_loader)

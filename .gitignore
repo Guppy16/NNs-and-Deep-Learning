@@ -4,3 +4,8 @@ resources/data
 .idea
 .vscode
 __pycache__
+
+*.egg-info
+*.egg
+.venv
+.archive

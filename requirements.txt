@@ -1,9 +1,0 @@
-dataclass-wizard
-ipython
-mypy
-numpy==1.26.1
-seaborn
-torch==2.4.0
-torchvision==0.19.0
-omegaconf
-tensorboard

@@ -88,3 +88,27 @@ class BaseConfig:
         config = OmegaConf.load(fpath)
         conf = cls(**config)
         return conf
+
+
+def copy_state_dict(from_model: torch.nn.Module, to_model: torch.nn.Module):
+    """Load state dict from another model
+
+    Build state dict using keys of to_model
+    and values of from_model
+
+    NOTE: This function should be used when the keys do not match,
+    which could be because to_model is a custom implementation of a
+    pretrained from_model.
+    """
+    to_state_dict = to_model.state_dict()
+    from_state_dict = from_model.state_dict()
+
+    state_dict = {
+        to_key: from_value
+        for (to_key, to_value), (from_key, from_value) in zip(
+            to_state_dict.items(), from_state_dict.items()
+        )
+    }
+
+    incompatible_keys = to_model.load_state_dict(state_dict)
+    return to_model, incompatible_keys
