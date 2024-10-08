@@ -2,7 +2,7 @@ resources/model
 resources/models
 resources/data
 .idea
-.vscode
+# .vscode
 __pycache__
 
 *.egg-info
