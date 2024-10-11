@@ -3,6 +3,7 @@ from typing import Type
 import torch
 from torch import Tensor
 from torch.utils.data import Subset, DataLoader
+import torch.nn.functional as F
 
 from experiments.resnet.resnet import get_resnet_for_feature_extraction
 from experiments.base import (
@@ -28,16 +29,6 @@ class ResNetTrainingArgs:
     learning_rate: float = 1e-3
     n_classes: int = 10
     subset: int = 10
-
-
-def loss_function(
-    logits: Float[Tensor, "batch n_classes"],
-    labels: list[int],
-    tb_logger: TBLogger,
-    tb_log_to="Loss/train",
-):
-    """Cross-Entropy Loss on the model outputs compared against the batch"""
-    pass
 
 
 def train_loop(
@@ -82,29 +73,34 @@ def train_loop(
                 # 3. Forward pass
                 logits = model(x)
                 # 4. Compute loss
-                loss = loss_function(logits, labels, tb_logger)
+                loss = F.cross_entropy(logits, labels, reduction="mean")
                 # 5. Backward pass
                 loss.backward()
                 # 6. Update weights
                 optimizer.step()
                 # Update progress bar
                 loss_item = loss.detach().cpu().item()
-                epoch_train_loss += loss_item
+                epoch_train_loss += loss_item  # loss per item
                 tb_logger.add_scalar("Loss/train", loss_item, global_step)
                 pbar.set_postfix({"Loss": loss_item})
                 global_step += 1
 
-        logger.info(f"Training Loss per item: {epoch_train_loss / len(train_loader)}")
+        epoch_train_loss = epoch_train_loss / len(train_loader)  # loss per item
+        logger.info(f"Training Loss per item: {epoch_train_loss}")
 
         if val_loader is not None:
             model.eval()
             val_loss = 0
             for x, labels in val_loader:
                 x = x.to(device)
-                loss = loss_function(logits, labels, tb_logger, tb_log_to="Loss/val")
-                val_loss += loss.detach().cpu().item()
-            logger.info(f"Validation Loss: {val_loss / len(val_loader)}")
-            tb_logger.add_scalar("Loss/val", val_loss / len(val_loader), global_step)
+                classes, _ = model.inference(x)
+                classes = classes.detach().cpu()
+                # prediction loss
+                loss = sum(c == l for c, l in zip(classes, labels))
+                val_loss += loss
+            val_loss = val_loss / len(val_loader)
+            logger.info(f"Validation Loss: {val_loss}")
+            tb_logger.add_scalar("Loss/val", val_loss, global_step)
 
 
 if __name__ == "__main__":
@@ -118,7 +114,7 @@ if __name__ == "__main__":
         / (datetime.now().strftime("%Y%m%d-%H%M%S") + "lr1e3")
     )
 
-    trainset, valset, testset = get_cifar()
+    trainset, valset, testset = get_cifar(subset=100)
     resnet = get_resnet_for_feature_extraction(n_classes=training_args.n_classes)
     tb_logger = TBLogger(model_dir / "logs")
 

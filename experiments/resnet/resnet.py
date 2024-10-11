@@ -16,6 +16,7 @@ from jaxtyping import Float, Int
 from PIL import Image
 from torch.utils.data import DataLoader, Subset
 from torchvision import datasets, models, transforms
+import torch.nn.functional as F
 
 from experiments.base import copy_state_dict, BaseConfig, BaseModel
 from dataclasses import dataclass, field
@@ -174,6 +175,17 @@ class ResNet34(BaseModel):
         Return: shape (batch, n_classes)
         """
         return self.nnet(x)
+
+    @torch.no_grad()
+    def inference(self, x: Float[Tensor, "batch channels height width"]):
+        """Get the predicted class and probability"""
+        self.eval()
+        logits = self(x)  # batch x n_classes
+        probs = F.softmax(logits, dim=-1)  # batch x n_classes
+        idxs = torch.argmax(probs, dim=-1)  # batch
+        confidence = probs[idxs]
+
+        return idxs, confidence
 
 
 def get_resnet_for_feature_extraction(n_classes: int) -> ResNet34:
