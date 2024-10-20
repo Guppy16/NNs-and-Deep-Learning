@@ -1,24 +1,19 @@
 from dataclasses import dataclass
-from typing import Type
-import torch
-from torch import Tensor
-from torch.utils.data import Subset, DataLoader
-import torch.nn.functional as F
-
-from experiments.resnet.resnet import get_resnet_for_feature_extraction
-from experiments.base import (
-    set_seeds,
-    RESOURCES,
-    TBLogger,
-    logger,
-)
 from datetime import datetime
-from torchvision.utils import save_image
 from pathlib import Path
-from tqdm import tqdm
-from experiments.data import get_cifar
+from typing import Type
 
+import torch
+import torch.nn.functional as F
 from jaxtyping import Float, Int
+from torch import Tensor
+from torch.utils.data import DataLoader, Subset
+from torchvision.utils import save_image
+from tqdm import tqdm
+
+from experiments.base import RESOURCES, TBLogger, logger, set_seeds
+from experiments.data import get_cifar
+from experiments.resnet.resnet import get_resnet_for_feature_extraction
 
 
 @dataclass
@@ -106,7 +101,8 @@ def train_loop(
 
 if __name__ == "__main__":
 
-    training_args = ResNetTrainingArgs(epochs=1)
+    # training_args = ResNetTrainingArgs(epochs=1)
+    training_args = ResNetTrainingArgs(epochs=3)
 
     model_dir = (
         RESOURCES
@@ -115,7 +111,8 @@ if __name__ == "__main__":
         / (datetime.now().strftime("%Y%m%d-%H%M%S") + "lr1e3")
     )
 
-    trainset, valset, testset = get_cifar(subset=100)
+    # trainset, valset, testset = get_cifar(subset=100)
+    trainset, valset, testset = get_cifar(subset=10)
     resnet = get_resnet_for_feature_extraction(n_classes=training_args.n_classes)
     tb_logger = TBLogger(model_dir / "logs")
 
