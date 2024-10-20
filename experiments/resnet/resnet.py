@@ -176,7 +176,7 @@ class ResNet34(BaseModel):
         """
         return self.nnet(x)
 
-    @torch.no_grad()
+    @torch.inference_mode()
     def inference(self, x: Float[Tensor, "batch channels height width"]):
         """Get the predicted class and probability"""
         self.eval()

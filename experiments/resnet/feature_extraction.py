@@ -68,6 +68,7 @@ def train_loop(
                 model.train()
                 # 1. Move input to device
                 x = x.to(device)
+                labels = labels.to(device)
                 # 2. Zero the gradients
                 optimizer.zero_grad()
                 # 3. Forward pass
@@ -96,11 +97,11 @@ def train_loop(
                 classes, _ = model.inference(x)
                 classes = classes.detach().cpu()
                 # prediction loss
-                loss = sum(c == l for c, l in zip(classes, labels))
+                loss = (classes == labels).sum().item()
                 val_loss += loss
-            val_loss = val_loss / len(val_loader)
-            logger.info(f"Validation Loss: {val_loss}")
-            tb_logger.add_scalar("Loss/val", val_loss, global_step)
+            val_loss = val_loss / len(valset)
+            logger.info("Validation Accuracy: %s", val_loss)
+            tb_logger.add_scalar("Accuracy/val", val_loss, global_step)
 
 
 if __name__ == "__main__":
