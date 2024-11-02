@@ -1,14 +1,14 @@
 """Base functionalities"""
 
-import torch
 import logging
-from pathlib import Path
 import os
 import sys
-from torch.utils.tensorboard import SummaryWriter
-from typing import TypeVar, Type
-from omegaconf import OmegaConf
+from pathlib import Path
+from typing import Type, TypeVar
 
+import torch
+from omegaconf import OmegaConf
+from torch.utils.tensorboard import SummaryWriter
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 SEED: int = 16  # Random seed
@@ -66,7 +66,7 @@ def count_parameters(model: torch.nn.Module) -> int:
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
-T = TypeVar("TBaseConfig", bound="BaseConfig")
+BaseConfigT = TypeVar("BaseConfigT", bound="BaseConfig")
 
 
 class BaseConfig:
@@ -83,7 +83,7 @@ class BaseConfig:
         return conf_path
 
     @classmethod
-    def load_config(cls: Type[T], fpath: Path) -> T:
+    def load_config(cls: Type[BaseConfigT], fpath: Path) -> BaseConfigT:
         """Load config from file path"""
         config = OmegaConf.load(fpath)
         conf = cls(**config)
@@ -134,6 +134,11 @@ class BaseModel(torch.nn.Module):
         model.load_state_dict(state_dict)
 
         return model
+
+    def count_parameters(self):
+        """Count the number of parameters in a model"""
+        num_params = count_parameters(self)
+        logger.info("Num params: %s", num_params)
 
 
 def copy_state_dict(from_model: torch.nn.Module, to_model: torch.nn.Module):
