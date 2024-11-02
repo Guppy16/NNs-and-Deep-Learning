@@ -93,13 +93,15 @@ def get_cifar(root_path: Path = ROOT_PATH, subset: int = 10):
     return cifar_trainset, cifar_valset, cifar_testset
 
 
-def get_normalised_mnist(subset: int = 1, train_val_split=[0.9, 0.1]):
-    """Return train, validation and test sets for normalised MNIST.
+def get_mnist(train_subset: int = 1, train_val_split=[0.9, 0.1]):
+    """Return train, validation and test sets for MNIST.
 
-    Normalisation: mean 0, std 1
+    ~~Normalisation: mean 0, std 1~~
+    Normalisation: [0,1] data is sufficient for MNIST.
+    Might work better for CNNs as the padding is 0, which is the mode.
 
     Args:
-        subset: Get every `subset`-th element from the dataset.
+        subset: Get every `subset`-th element from the train dataset.
         Equivalently, the fraction of the dataset to use is 1 / `subset`.
     """
 
@@ -110,7 +112,7 @@ def get_normalised_mnist(subset: int = 1, train_val_split=[0.9, 0.1]):
         [
             v2.ToImage(),
             v2.ToDtype(torch.float32, scale=True),  # scale to [0, 1]
-            v2.Normalize(mean=[0.1307], std=[0.3081]),
+            # v2.Normalize(mean=[0.1307], std=[0.3081]),
         ]
     )
 
@@ -121,11 +123,9 @@ def get_normalised_mnist(subset: int = 1, train_val_split=[0.9, 0.1]):
     logger.info("Train size: %s", len(train_data))
     logger.info("Test size: %s", len(test_data))
 
-    if subset > 1:
-        train_data = Subset(train_data, indices=range(0, len(train_data), subset))
-        test_data = Subset(test_data, indices=range(0, len(test_data), subset))
-
     train_data, val_data = random_split(train_data, train_val_split, generator=rng)
+    if train_subset > 1:
+        train_data = Subset(train_data, indices=range(0, len(train_data), train_subset))
 
     return train_data, val_data, test_data
 
@@ -136,6 +136,6 @@ if __name__ == "__main__":
 
     trainset, valset, testset = get_cifar()
 
-    trainset, valset, testset = get_normalised_mnist()
+    trainset, valset, testset = get_mnist()
     breakpoint()
     print("Done")
