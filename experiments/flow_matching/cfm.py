@@ -22,7 +22,7 @@ class FlowConfig(BaseConfig):
 
 
 class Flow(BaseModel):
-    def __init__(self, config: FlowConfig):
+    def __init__(self, config: FlowConfig, **kwargs):
         super().__init__()
         self.config = config
 
@@ -46,6 +46,7 @@ class Flow(BaseModel):
         x = torch.cat((t, x_t), -1)
         return self.net(x)
 
+    @torch.inference_mode()
     def step(
         self,
         x_t: Float[Tensor, "b d"],
@@ -67,14 +68,28 @@ class Flow(BaseModel):
 
         return x_t1 + dx
 
+    @torch.inference_mode()
+    def sample(self, batch=300, n_steps=8):
+        x = torch.randn(batch, self.config.dim)
+        time_steps = torch.linspace(0, 1.0, n_steps + 1)
+
+        samples = torch.empty((n_steps + 1, *x.shape), device=x.device, dtype=x.dtype)
+        samples[0] = x
+
+        for i, (t1, t2) in enumerate(itertools.pairwise(time_steps)):
+            x = self.step(x, t1, t2)  # update x
+            samples[i + 1] = x
+
+        return samples, time_steps
+
 
 @dataclass
 class FlowTrainerConfig(BaseConfig):
-    epochs = 10000
-    batch_size = 256
-    data_noise = 0.05
+    epochs: int = 10000
+    batch_size: int = 256
+    data_noise: float = 0.05
 
-    learning_rate = 1e-2
+    learning_rate: float = 1e-2
 
 
 class FlowTrainer:
@@ -97,7 +112,7 @@ class FlowTrainer:
             / "flow"
             / (datetime.now().strftime("%Y%m%d-%H%M%S") + "")
         )
-        self.model_dir.mkdir(parents=True, exist_ok=True)
+        # self.model_dir.mkdir(parents=True, exist_ok=True)
         self.config.save_config(self.model_dir)
 
         self.tb_logger = TBLogger(self.model_dir / "logs")
@@ -144,23 +159,10 @@ class FlowTrainer:
                 self.tb_logger.add_scalar("loss/train", loss_value, i)
                 pbar.set_postfix({"Loss": loss_value})
 
-    def sample(self, batch=300, n_steps=8):
-        with torch.inference_mode():
-            x = torch.randn(batch, self.model.config.dim)
-            time_steps = torch.linspace(0, 1.0, n_steps + 1)
-
-            samples = [x]
-
-            for t1, t2 in itertools.pairwise(time_steps):
-                x = self.model.step(x, t1, t2)  # update x
-                samples.append(x)
-
-            return samples, time_steps
-
     def plot_samples(self):
 
         n_steps = 8
-        samples, time_steps = self.sample(n_steps=n_steps)
+        samples, time_steps = self.model.sample(n_steps=n_steps)
 
         fig, axs = plt.subplots(
             1, n_steps + 1, figsize=(30, 4), sharex=True, sharey=True
@@ -183,4 +185,5 @@ if __name__ == "__main__":
 
     trainer = FlowTrainer(trainer_config, model_config)
     trainer.train()
+    trainer.model.save_model(trainer.model_dir / "model")
     trainer.plot_samples()
