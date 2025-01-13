@@ -76,11 +76,13 @@ class BaseConfig:
 
     def save_config(self, conf_path: Path):
         """Save config to model_dir"""
-        # conf = OmegaConf.to_yaml(self)
-        conf_path.mkdir(parents=True, exist_ok=True)
-        conf_path = conf_path / self.CONFIG_FILENAME
-        OmegaConf.save(self, conf_path)
-        return conf_path
+
+        conf_file = conf_path / self.CONFIG_FILENAME
+        conf_file.parent.mkdir(parents=True, exist_ok=True)
+
+        OmegaConf.save(self, conf_file)
+
+        return conf_file
 
     @classmethod
     def load_config(cls: Type[BaseConfigT], fpath: Path) -> BaseConfigT:
@@ -99,6 +101,10 @@ class BaseModel(torch.nn.Module):
     MODEL_FILENAME = "model.tar"
     CONFIG_FILENAME = "config.yaml"
 
+    def __init__(self, config: BaseConfig = BaseConfig()):
+        super().__init__()
+        self.config = config
+
     def save_model(self, model_dir: Path) -> tuple[Path, Path]:
         """Save model and config to model_path and return file locations"""
 
@@ -110,10 +116,7 @@ class BaseModel(torch.nn.Module):
         logger.info("Model saved to %s ", model_path)
 
         # save params
-        conf = OmegaConf.to_yaml(self.config)
-        conf_path = model_dir / BaseModel.CONFIG_FILENAME
-        with open(conf_path, "w") as f:
-            f.write(conf)
+        conf_path = self.config.save_config(model_dir)
 
         return model_path, conf_path
 
@@ -127,7 +130,7 @@ class BaseModel(torch.nn.Module):
         with open(model_dir / BaseModel.CONFIG_FILENAME, "r") as f:
             config = OmegaConf.load(f)
 
-        model = cls(config, tb_logger=None)
+        model = cls(config)
         # load state dict
         model_path = model_dir / BaseModel.MODEL_FILENAME
         state_dict = torch.load(model_path, map_location=DEVICE)
