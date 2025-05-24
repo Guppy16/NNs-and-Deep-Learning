@@ -17,11 +17,15 @@ Note that this is a mixture of Gaussians, where each Gaussian is the latent dist
 
 We note that our prior on the latent space is $z \sim \mathcal{N}(0, I)$ and we try to enforce this with the KL term in the loss. However, perhaps counterintuitively, this does _not_ mean that the $z|C$ must also be $\mathcal{N}(0,1)$. In fact, we would expect the distributions to be rather different so that the decoder can learn to generate the correct digit from the latent space, which is emposed by the reconstruction loss.
 
+Perhaps we may expect some automatic clustering due to the similarity of the digits like so:
+
+```
 1 7
 
-2 3 5
+2 5 3
 
-0 4 6 9 8
+0 8 6 9 4
+```
 
 > Exercise: Calculate the mean and covariance of the latent space for each digit class.
 
@@ -129,11 +133,11 @@ $$
 
 > Exercise: Prove the pCN acceptance threshold simplification. (We ignore the measure theoretic details).
 
-$$
+<!-- $$
 \begin{align*}
   
 \end{align*}
-$$
+$$ -->
 
 ## Experiment Ideas
 

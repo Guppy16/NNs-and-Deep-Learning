@@ -2,6 +2,7 @@
 
 This markdown file contains my notes on Chapter 3 of the book [Neural Networks and Deep Learning](http://neuralnetworksanddeeplearning.com/chap3.html).
 This chapter will introduce many techniques to improve the network learning including:
+
 - Cross Entropy cost function
 - Softmax on the output layer
 - 4 Regularisation methods
@@ -135,18 +136,18 @@ Consider the derivative of the softmax function wrt an input:
 $$
 \begin{align*}
   \frac{\partial a_j^L}{\partial z_k^L}
-  &= \frac{\partial}{\partial z_k^L} \left\\{ \exp(z_j^L) \left(\sum_i \exp(z_i^L)\right)^{-1} \right\\} \\
+  &= \frac{\partial}{\partial z_k^L} \left\{ \exp(z_j^L) \left(\sum_i \exp(z_i^L)\right)^{-1} \right\} \\
   %%% Consider j not equal to k
   \text{for } j \ne k \\
   &= - \exp(z_j^L) \exp(z_k^L) \left(\sum_i \exp(z_i^L)\right)^{-2} \\
-  &= - a_j^L (1 - a_k^L)\\
+  &= - a_j^L (1 - a_k^L)\\  
   & < 0 \\
   %%% Consider j=k
   \text{for } j = k \\
   &= \exp(z_j^L) \left(\sum_i \exp(z_i^L)\right)^{-1} - \exp(2z_j^L) \left(\sum_i \exp(z_i^L)\right)^{-2} \\
   &= a_j^L - {a_j^L}^2 = a_j^L (1 - a_j^L) \\
   &= \exp(z_j^L) \left( \sum_{i \ne j} \exp(z_i^L) \right) \left(\sum_i \exp(z_i^L)\right)^{-2} \\
-  &> 0
+  % &> 0
 \end{align*}
 $$
 

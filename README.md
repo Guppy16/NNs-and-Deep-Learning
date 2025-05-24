@@ -7,7 +7,7 @@ This repo contains a portfolio of experiments and notes on NNs and DL. The aim i
 
 ### Visualising the Latent Space of a beta-VAE
 
-> The KL loss in a VAE encourages the encoder to map inputs to latents that are close to the prior distribution $\mathcal{N}(0, I)$. We can visualise this distribution for each class in the MNIST dataset by approximating it as a _Mixture of Gaussians_. 
+> The KL loss in a VAE encourages the encoder to map inputs to latents that are close to the prior distribution $\mathcal{N}(0, I)$. We can visualise this distribution for each class in the MNIST dataset by approximating it as a _Mixture of Gaussians_.
 
 <div>
 <div style="justify-content: space-between;">
@@ -76,9 +76,9 @@ The [`notes/`](<notes/>) folder contains markdown notes on the relevant NN theor
 
 For each chapter, I have written some notes and answers to most exercises / problems:
 
-- [1 Neural Network Intro](<notes/1 NNs Intro.md>)
-- [2 Backpropogation](<notes/2 Backpropogation.md>)
-- [3 Improving Learning](<notes/3 Improving Learning.md>)
+- [1 Neural Network Intro](<notes/1-NNs_Intro.md>)
+- [2 Backpropagation](<notes/2-Backpropagation.md>)
+- [3 Improving Learning](<notes/3-Improving_Learning.md>)
 
 This is a WIP; I have yet to do the later chapters.
 I also aim to cover the following topics:
@@ -137,10 +137,15 @@ class ModelConfig:
 
 ### Tensorboard
 
-for logging: see [`base.py`](<experiments/base.py>)
+for logging: see [`base.py`](https://github.com/Guppy16/NNs-and-Deep-Learning/blob/master/experiments/base.py)
 
 A list of potential avenues to explore:
 
 - pytorch-lightning
 - hydra
 - fire
+
+
+### Quarto
+
+[Quarto](https://quarto.org/) was used to generate the website for this repo.

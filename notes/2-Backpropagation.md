@@ -1,4 +1,4 @@
-# How the backpropogation algorithm works
+# How the backpropagation algorithm works
 
 This markdown file contains my notes on Chapter 2 of the book [Neural Networks and Deep Learning]([url](http://neuralnetworksanddeeplearning.com/chap2.html)).
 It is essentially a bank of equation derivations:
@@ -8,9 +8,9 @@ It is essentially a bank of equation derivations:
   - Recursive equation for layer error
   - Error due to bias
   - Error due to weight in any layer
-- Backpropogation algorithm
+- Backpropagation algorithm
 
-The backpropogation algorithm was introduced in the 70s, but was better understood in a famous [1986 paper by Rumelhart, Hinton, Williams](http://www.nature.com/nature/journal/v323/n6088/pdf/323533a0.pdf)
+The backpropagation algorithm was introduced in the 70s, but was better understood in a famous [1986 paper by Rumelhart, Hinton, Williams](http://www.nature.com/nature/journal/v323/n6088/pdf/323533a0.pdf)
 
 ## A fast matrix-based approach to computing the output from a neural network
 
@@ -45,7 +45,7 @@ $$
 
 Element-wise product of two matrices of the same dimension commonly referred to as _Hadamard product_ or _Schur product_:
 
-```math
+$$
 \begin{bmatrix}
   1 \\ 2
 \end{bmatrix}
@@ -61,7 +61,7 @@ Element-wise product of two matrices of the same dimension commonly referred to 
 \begin{bmatrix}
   3 \\ 8  
 \end{bmatrix}
-```
+$$
 
 ## Fundamental equations behind backpropagation
 
@@ -153,7 +153,7 @@ Some insights;
 - Similarily if $\sigma'(z^l) \ll (w^{l+1})^T \delta^{l+1}$ , then the weights and biases in previous layers will learn slowly.
 - To get around _saturation_, one can use an activation function that has a constant / increasing gradient.
 
-## Backpropogation Algorithm
+## Backpropagation Algorithm
 
 1. _Input_ $x$ Set the corresponding activation for the input layer $a^{l=1}$ (I believe the input _literally_ just sets the activations in the first layer)
 2. _Feedforward_: For each $l=\{1,2,\ldots,L \}$, compute: $z^l$ and $a^l$

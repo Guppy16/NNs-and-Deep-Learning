@@ -4,6 +4,7 @@ project:
   render:
     - "notes/*.md"
     - README.md
+    - experiments/classifier/chap1-no_hidden_layer-MSE_loss.ipynb
 
 # Multiple sidebars / navbar: https://quarto.org/docs/websites/website-navigation.html
 website:
