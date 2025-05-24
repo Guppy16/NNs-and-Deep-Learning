@@ -1,0 +1,46 @@
+project:
+  type: website
+  output-dir: docs
+  render:
+    - "notes/*.md"
+    - README.md
+
+# Multiple sidebars / navbar: https://quarto.org/docs/websites/website-navigation.html
+website:
+  title: "NNs and DL"
+  sidebar:
+    style: docked
+    contents:
+      - text: Introduction
+        href: README.md
+      - text: VAE
+        href: notes/VAE.md
+      - section: Notes
+        contents:
+          - text: Intro to Neural Networks
+            href: notes/1-NNs_Intro.md
+          - text: Backpropagation
+            href: notes/2-Backpropagation.md
+          - text: Improving Learning
+            href: notes/3-Improving_Learning.md
+  navbar:
+    background: primary
+    search: true
+    # menu:
+    #   - href: README.md
+    tools:
+      - icon: twitter-x
+        href: https://x.com/AkashGu30808281
+      - icon: github
+        href: https://github.com/Guppy16/NNs-and-Deep-Learning
+
+
+
+format:
+  html:
+    theme:
+      dark: darkly
+      light: flatly
+    # css: styles.css
+    theme-dark: true
+    toc: true
