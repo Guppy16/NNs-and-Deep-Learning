@@ -135,6 +135,26 @@
     ]
   },
   {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "NNs and Deep Learning",
+    "section": "",
+    "text": "This site contains a portfolio of experiments and notes on NNs and DL. The aim is twofold:\n\nuse visualisations to understand the latent space when a NN is training\nkeep up to date with NN programming practices\n\n\n\n\nThe KL loss in a VAE encourages the encoder to map inputs to latents that are close to the prior distribution \\(\\mathcal{N}(0, I)\\). We can visualise this distribution for each class in the MNIST dataset by approximating it as a Mixture of Gaussians.\n\n\n\n\n\n\nStandard VAE (β = 1)\n\n\n\n\n\nThe class distributions converge to very different distributions. Digit 0 has a larger spread.\n\n\n\n\n\nβ = 10\n\n\n\n\n\n The distribution shapes are more similar, but they still try to converge to different locations. \n\n\n\n\n  Both VAEs have the same architecture with a 2D latent space, and were trained for a single epoch. In both cases, the model learns to try and separate the the location of the class distributions, however there is significant overlap between the numbers 4 and 9, which is to be expected. The shapes of the distributions are very similar in the beta VAE, which is due the stronger KL loss. \n\n\n\n\n\n\nIn classification tasks, a NN learns weights so that it is able to create simple decision boundaries to separate classes in the latent space.\n\n\n\n\n\n\nVisualising hidden layer with 3 nodes - each has its own axis (NN layers: {784,10,3,10}). As epoch increases, the learnt weights push each digit class to a corner. Unsurprisingly, digits 4 and 9 have significant overlap! See this folder for implementation.\n\n\n\n\n\n\nWhen there is no non-linearity in the NN, the weights are equivalent to a single linear transformation. In the case of classification, intuitively, we are applying a mask on the input.\n\n\n\n\n\n\nWeights learnt for each digit in a NN with no hidden layer. This is equivalent to applying a mask / linear transformation. See this notebook for implementation.\n\n\n\n\n\nThe notes/ folder contains markdown notes on the relevant NN theory required for the experiments. It also contains notes and exercises from the book Neural Networks and Deep Learning.\nFor each chapter, I have written some notes and answers to most exercises / problems:\n\n1 Neural Network Intro\n2 Backpropagation\n3 Improving Learning\n\nThis is a WIP; I have yet to do the later chapters. I also aim to cover the following topics:\n\nNotes on Activation Functions\n\nSwish, softplus (for VAE to predict variance)\n\nRegularisation: L1, L2, Dropout, Continual Backprop\nGrid search over batch-size, lr using hydra\n\n\n\nQuarto was used to generate the website for this repo.",
+    "crumbs": [
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "index.html#notes",
+    "href": "index.html#notes",
+    "title": "NNs and Deep Learning",
+    "section": "",
+    "text": "The notes/ folder contains markdown notes on the relevant NN theory required for the experiments. It also contains notes and exercises from the book Neural Networks and Deep Learning.\nFor each chapter, I have written some notes and answers to most exercises / problems:\n\n1 Neural Network Intro\n2 Backpropagation\n3 Improving Learning\n\nThis is a WIP; I have yet to do the later chapters. I also aim to cover the following topics:\n\nNotes on Activation Functions\n\nSwish, softplus (for VAE to predict variance)\n\nRegularisation: L1, L2, Dropout, Continual Backprop\nGrid search over batch-size, lr using hydra\n\n\n\nQuarto was used to generate the website for this repo.",
+    "crumbs": [
+      "Introduction"
+    ]
+  },
+  {
     "objectID": "notes/1-NNs_Intro.html",
     "href": "notes/1-NNs_Intro.html",
     "title": "Chapter 1: Using neural nets to recognize handwritten digits",
@@ -278,43 +298,43 @@
     ]
   },
   {
-    "objectID": "README.html",
-    "href": "README.html",
-    "title": "NNs and Deep Learning",
+    "objectID": "notes/composition.html",
+    "href": "notes/composition.html",
+    "title": "Framework for Experiments",
     "section": "",
-    "text": "This repo contains a portfolio of experiments and notes on NNs and DL. The aim is twofold:\n\nuse visualisations to understand the latent space when a NN is training\nkeep up to date with NN programming practices\n\n\n\n\nThe KL loss in a VAE encourages the encoder to map inputs to latents that are close to the prior distribution \\(\\mathcal{N}(0, I)\\). We can visualise this distribution for each class in the MNIST dataset by approximating it as a Mixture of Gaussians.\n\n\n\n\n\n\nStandard VAE (β = 1)\n\n\n\n\n\nThe class distributions converge to very different distributions. Digit 0 has a larger spread.\n\n\n\n\n\nβ = 10\n\n\n\n\n\n The distribution shapes are more similar, but they still try to converge to different locations. \n\n\n\n\n  Both VAEs have the same architecture with a 2D latent space, and were trained for a single epoch. In both cases, the model learns to try and separate the the location of the class distributions, however there is significant overlap between the numbers 4 and 9, which is to be expected. The shapes of the distributions are very similar in the beta VAE, which is due the stronger KL loss. \n\n\n\n\n\n\nIn classification tasks, a NN learns weights so that it is able to create simple decision boundaries to separate classes in the latent space.\n\n\n\n\n\n\nVisualising hidden layer with 3 nodes - each has its own axis (NN layers: {784,10,3,10}). As epoch increases, the learnt weights push each digit class to a corner. Unsurprisingly, digits 4 and 9 have significant overlap! See this folder for implementation.\n\n\n\n\n\n\nWhen there is no non-linearity in the NN, the weights are equivalent to a single linear transformation. In the case of classification, intuitively, we are applying a mask on the input.\n\n\n\n\n\n\nWeights learnt for each digit in a NN with no hidden layer. This is equivalent to applying a mask / linear transformation. See this notebook for implementation.\n\n\n\n\n\nREADME.md\nexperiments/  - NN PyTorch class, training experiments\nnotes/        - markdown notes for experiments and theory\nresources/    - store dataset, model and figures\n\n\n\nThe notes/ folder contains markdown notes on the relevant NN theory required for the experiments. It also contains notes and exercises from the book Neural Networks and Deep Learning.\nFor each chapter, I have written some notes and answers to most exercises / problems:\n\n1 Neural Network Intro\n2 Backpropagation\n3 Improving Learning\n\nThis is a WIP; I have yet to do the later chapters. I also aim to cover the following topics:\n\nNotes on Activation Functions\n\nSwish, softplus (for VAE to predict variance)\n\nRegularisation: L1, L2, Dropout, Continual Backprop\nGrid search over batch-size, lr using hydra\n\n\n\n\nThis documents the best practices I have learnt for programming NNs.\n\n\ndef train_loop(self, ...):\n  for epoch in range(epochs):\n    for batch in dataloader:\n      self.train()\n      # 1. Move data to device\n      batch = batch.to(device) \n      # 2. Zero gradients\n      self.optimizer.zero_grad()\n      # 3. Forward pass\n      output = self.model(batch)\n      # 4. Compute loss\n      loss = self.loss_function(output, batch)\n      # 5. Backward pass\n      loss.backward()\n      # 6. Update weights\n      self.optimizer.step()\n\n\n\nconfiguring NNs and storing (hyper)parameters\n@dataclass\nclass ModelConfig:\n  # model parameters\n  hidden_dim: int = 128\n  # training parameters\n  lr: float = 1e-3\n  batch_size: int = 32\n\n  def save_config(self, path: Path):\n    OmegaConf.save(OmegaConf.to_yaml(self), path)\n\n  @staticmethod\n  def load_config(path: Path) -&gt; \"ModelConfig\":\n    conf = OmegaConf.load(path)\n    return ModelConfig(**conf)\n\n\n\nfor logging: see base.py\nA list of potential avenues to explore:\n\npytorch-lightning\nhydra\nfire\n\n\n\n\nQuarto was used to generate the website for this repo.",
+    "text": "This documents the some of the best practices I have learnt for programming NNs.\n\n\ndef train_loop(self, ...):\n  for epoch in range(epochs):\n    for batch in dataloader:\n      self.train()\n      # 1. Move data to device\n      batch = batch.to(device) \n      # 2. Zero gradients\n      self.optimizer.zero_grad()\n      # 3. Forward pass\n      output = self.model(batch)\n      # 4. Compute loss\n      loss = self.loss_function(output, batch)\n      # 5. Backward pass\n      loss.backward()\n      # 6. Update weights\n      self.optimizer.step()\n\n\n\nconfiguring NNs and storing (hyper)parameters\n@dataclass\nclass ModelConfig:\n  # model parameters\n  hidden_dim: int = 128\n  # training parameters\n  lr: float = 1e-3\n  batch_size: int = 32\n\n  def save_config(self, path: Path):\n    OmegaConf.save(OmegaConf.to_yaml(self), path)\n\n  @staticmethod\n  def load_config(path: Path) -&gt; \"ModelConfig\":\n    conf = OmegaConf.load(path)\n    return ModelConfig(**conf)\n\n\n\nfor logging: see base.py\nA list of potential avenues to explore:\n\npytorch-lightning\nhydra\nfire",
     "crumbs": [
-      "Introduction"
+      "Python for NNs"
     ]
   },
   {
-    "objectID": "README.html#organisation",
-    "href": "README.html#organisation",
-    "title": "NNs and Deep Learning",
+    "objectID": "notes/composition.html#pytorch-training-loop",
+    "href": "notes/composition.html#pytorch-training-loop",
+    "title": "Framework for Experiments",
     "section": "",
-    "text": "README.md\nexperiments/  - NN PyTorch class, training experiments\nnotes/        - markdown notes for experiments and theory\nresources/    - store dataset, model and figures",
+    "text": "def train_loop(self, ...):\n  for epoch in range(epochs):\n    for batch in dataloader:\n      self.train()\n      # 1. Move data to device\n      batch = batch.to(device) \n      # 2. Zero gradients\n      self.optimizer.zero_grad()\n      # 3. Forward pass\n      output = self.model(batch)\n      # 4. Compute loss\n      loss = self.loss_function(output, batch)\n      # 5. Backward pass\n      loss.backward()\n      # 6. Update weights\n      self.optimizer.step()",
     "crumbs": [
-      "Introduction"
+      "Python for NNs"
     ]
   },
   {
-    "objectID": "README.html#notes",
-    "href": "README.html#notes",
-    "title": "NNs and Deep Learning",
+    "objectID": "notes/composition.html#omegaconf-dataclass",
+    "href": "notes/composition.html#omegaconf-dataclass",
+    "title": "Framework for Experiments",
     "section": "",
-    "text": "The notes/ folder contains markdown notes on the relevant NN theory required for the experiments. It also contains notes and exercises from the book Neural Networks and Deep Learning.\nFor each chapter, I have written some notes and answers to most exercises / problems:\n\n1 Neural Network Intro\n2 Backpropagation\n3 Improving Learning\n\nThis is a WIP; I have yet to do the later chapters. I also aim to cover the following topics:\n\nNotes on Activation Functions\n\nSwish, softplus (for VAE to predict variance)\n\nRegularisation: L1, L2, Dropout, Continual Backprop\nGrid search over batch-size, lr using hydra",
+    "text": "configuring NNs and storing (hyper)parameters\n@dataclass\nclass ModelConfig:\n  # model parameters\n  hidden_dim: int = 128\n  # training parameters\n  lr: float = 1e-3\n  batch_size: int = 32\n\n  def save_config(self, path: Path):\n    OmegaConf.save(OmegaConf.to_yaml(self), path)\n\n  @staticmethod\n  def load_config(path: Path) -&gt; \"ModelConfig\":\n    conf = OmegaConf.load(path)\n    return ModelConfig(**conf)",
     "crumbs": [
-      "Introduction"
+      "Python for NNs"
     ]
   },
   {
-    "objectID": "README.html#framework-for-experiments",
-    "href": "README.html#framework-for-experiments",
-    "title": "NNs and Deep Learning",
+    "objectID": "notes/composition.html#tensorboard",
+    "href": "notes/composition.html#tensorboard",
+    "title": "Framework for Experiments",
     "section": "",
-    "text": "This documents the best practices I have learnt for programming NNs.\n\n\ndef train_loop(self, ...):\n  for epoch in range(epochs):\n    for batch in dataloader:\n      self.train()\n      # 1. Move data to device\n      batch = batch.to(device) \n      # 2. Zero gradients\n      self.optimizer.zero_grad()\n      # 3. Forward pass\n      output = self.model(batch)\n      # 4. Compute loss\n      loss = self.loss_function(output, batch)\n      # 5. Backward pass\n      loss.backward()\n      # 6. Update weights\n      self.optimizer.step()\n\n\n\nconfiguring NNs and storing (hyper)parameters\n@dataclass\nclass ModelConfig:\n  # model parameters\n  hidden_dim: int = 128\n  # training parameters\n  lr: float = 1e-3\n  batch_size: int = 32\n\n  def save_config(self, path: Path):\n    OmegaConf.save(OmegaConf.to_yaml(self), path)\n\n  @staticmethod\n  def load_config(path: Path) -&gt; \"ModelConfig\":\n    conf = OmegaConf.load(path)\n    return ModelConfig(**conf)\n\n\n\nfor logging: see base.py\nA list of potential avenues to explore:\n\npytorch-lightning\nhydra\nfire\n\n\n\n\nQuarto was used to generate the website for this repo.",
+    "text": "for logging: see base.py\nA list of potential avenues to explore:\n\npytorch-lightning\nhydra\nfire",
     "crumbs": [
-      "Introduction"
+      "Python for NNs"
     ]
   }
 ]

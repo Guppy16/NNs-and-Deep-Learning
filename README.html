@@ -416,6 +416,7 @@ window.Quarto = {
 <li>use visualisations to understand the latent space when a NN is training</li>
 <li>keep up to date with NN programming practices</li>
 </ul>
+<p>View this repo in website format: <a href="https://guppy16.github.io/NNs-and-Deep-Learning/">guppy16.github.io/NNs-and-Deep-Learning</a></p>
 <section id="visualising-the-latent-space-of-a-beta-vae" class="level3">
 <h3 class="anchored" data-anchor-id="visualising-the-latent-space-of-a-beta-vae">Visualising the Latent Space of a beta-VAE</h3>
 <blockquote class="blockquote">
@@ -560,7 +561,14 @@ resources/    - store dataset, model and figures</code></pre>
 </section>
 <section id="quarto" class="level3">
 <h3 class="anchored" data-anchor-id="quarto">Quarto</h3>
-<p><a href="https://quarto.org/">Quarto</a> was used to generate the website for this repo.</p>
+<p><a href="https://quarto.org/">Quarto</a> was used to generate the website for this repo. Some useful commands:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Render the website</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">quarto</span> render</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Serve the website locally</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="ex">quarto</span> preview</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Publish the website to GitHub Pages</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="ex">quarto</span> publish gh-pages</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 
 </section>
@@ -653,7 +661,7 @@ resources/    - store dataset, model and figures</code></pre>
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp("https:\/\/Guppy16\.github\.io\/NNs-and-Deep-Learning\/");
+        var filterRegex = new RegExp('/' + window.location.host + '/');
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
