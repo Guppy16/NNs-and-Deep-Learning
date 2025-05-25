@@ -5,6 +5,10 @@ This repo contains a portfolio of experiments and notes on NNs and DL. The aim i
 - use visualisations to understand the latent space when a NN is training
 - keep up to date with NN programming practices
 
+View this repo in website format: [guppy16.github.io/NNs-and-Deep-Learning](https://guppy16.github.io/NNs-and-Deep-Learning/)
+
+## Visualisations
+
 ### Visualising the Latent Space of a beta-VAE
 
 > The KL loss in a VAE encourages the encoder to map inputs to latents that are close to the prior distribution $\mathcal{N}(0, I)$. We can visualise this distribution for each class in the MNIST dataset by approximating it as a _Mixture of Gaussians_.
@@ -149,3 +153,14 @@ A list of potential avenues to explore:
 ### Quarto
 
 [Quarto](https://quarto.org/) was used to generate the website for this repo.
+Some useful commands:
+
+```bash
+
+# Render the website
+quarto render
+# Serve the website locally
+quarto preview
+# Publish the website to GitHub Pages
+quarto publish gh-pages
+```
