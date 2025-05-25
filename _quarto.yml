@@ -2,18 +2,19 @@ project:
   type: website
   output-dir: docs
   render:
+    - index.qmd
     - "notes/*.md"
-    - README.md
     - experiments/classifier/chap1-no_hidden_layer-MSE_loss.ipynb
 
 # Multiple sidebars / navbar: https://quarto.org/docs/websites/website-navigation.html
 website:
   title: "NNs and DL"
+  repo-url: https://github.com/Guppy16/NNs-and-Deep-Learning
   sidebar:
     style: docked
     contents:
       - text: Introduction
-        href: README.md
+        href: index.qmd
       - text: VAE
         href: notes/VAE.md
       - section: Notes
@@ -24,6 +25,9 @@ website:
             href: notes/2-Backpropagation.md
           - text: Improving Learning
             href: notes/3-Improving_Learning.md
+      - text: Python for NNs
+        href: notes/composition.md
+
   navbar:
     background: primary
     search: true
